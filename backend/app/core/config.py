@@ -9,8 +9,12 @@ class Settings:
     
     # Database URL
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/ats_db")
-    # Fallback to sqlite locally for quick validation if PostgreSQL is unavailable
-    SQLITE_DATABASE_URL: str = "sqlite:///./local_ats.db"
+    # Use /tmp directory on Vercel since the root filesystem is read-only
+    SQLITE_DATABASE_URL: str = (
+        "sqlite:////tmp/local_ats.db"
+        if os.getenv("VERCEL")
+        else "sqlite:///./local_ats.db"
+    )
     
     # Supabase Storage Configurations
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")

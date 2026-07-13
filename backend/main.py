@@ -1,4 +1,12 @@
 import os
+import sys
+
+# Add the current directory to sys.path to allow absolute imports of the 'app' package
+# when running locally from the workspace root or on Vercel.
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 import shutil
 import re
 from typing import Any, cast
@@ -9,16 +17,16 @@ from sqlalchemy.orm import Session
 import io
 import logging
 
-from backend.app.core.config import settings
-from backend.app.core.database import get_db, init_db
-from backend.app.core.models import Resume, JobDescription, ATSReport, OptimizedResume
-from backend.app.engine.pdf_parser import extract_text_from_pdf
-from backend.app.engine.docx_parser import extract_text_from_docx
-from backend.app.engine.ats_scorer import calculate_ats_metrics, extract_keywords_from_text
-from backend.app.engine.prompt_layer import optimize_resume_data
-from backend.app.engine.pdf_generator import generate_styled_resume_html
-from backend.app.engine.docx_generator import generate_docx_from_data
-from backend.app.engine.supabase_storage import upload_file_to_supabase
+from app.core.config import settings
+from app.core.database import get_db, init_db
+from app.core.models import Resume, JobDescription, ATSReport, OptimizedResume
+from app.engine.pdf_parser import extract_text_from_pdf
+from app.engine.docx_parser import extract_text_from_docx
+from app.engine.ats_scorer import calculate_ats_metrics, extract_keywords_from_text
+from app.engine.prompt_layer import optimize_resume_data
+from app.engine.pdf_generator import generate_styled_resume_html
+from app.engine.docx_generator import generate_docx_from_data
+from app.engine.supabase_storage import upload_file_to_supabase
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)

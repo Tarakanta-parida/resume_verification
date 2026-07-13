@@ -1,7 +1,7 @@
 import os
 import requests
 import logging
-from backend.app.core.config import settings
+from app.core.config import settings
 
 logger = logging.getLogger("ats-optimizer")
 

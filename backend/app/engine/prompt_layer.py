@@ -92,7 +92,8 @@ def optimize_via_openai(data: Dict[str, Any], jd: str, missing: List[str]) -> Di
             {"role": "user", "content": prompt}
         ],
         response_format={"type": "json_object"},
-        temperature=0.2
+        temperature=0.2,
+        stream=False
     )
     return json.loads(response.choices[0].message.content or "{}")
 
@@ -254,7 +255,8 @@ def parse_resume_text_via_llm(raw_text: str) -> Dict[str, Any]:
                     {"role": "user", "content": f"Raw Resume Text:\n{raw_text}"}
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.1
+                temperature=0.1,
+                stream=False
             )
             return json.loads(response.choices[0].message.content or "{}")
         except Exception as e:
