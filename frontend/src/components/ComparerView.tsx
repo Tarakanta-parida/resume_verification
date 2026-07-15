@@ -313,25 +313,25 @@ function ResumePaper({
 
   return (
     <div>
-      <h2 className="text-center font-title font-extrabold text-[19px] text-slate-900 tracking-tight mb-1">
+      <h2 className="text-center font-bold text-[22px] text-black mb-1 font-serif">
         {data.personalInfo.name}
       </h2>
-      <div className="text-center text-[10px] text-slate-500 font-medium mb-5 pb-2 border-b border-slate-200 flex justify-center gap-2">
-        <span>{data.personalInfo.email}</span> | <span>{data.personalInfo.phone}</span>
-        {data.personalInfo.linkedin && <> | <span>{data.personalInfo.linkedin}</span></>}
-        {data.personalInfo.github && <> | <span>{data.personalInfo.github}</span></>}
+      <div className="text-center text-[11px] text-black font-semibold mb-4 flex justify-center gap-2">
+        <span>Mobile: - {data.personalInfo.phone}</span> | <span>Email: - <a href={`mailto:${data.personalInfo.email}`} className="text-blue-600 underline">{data.personalInfo.email}</a></span>
+        {data.personalInfo.linkedin && <> | <span><a href={data.personalInfo.linkedin} className="text-blue-600 underline">LinkedIn</a></span></>}
+        {data.personalInfo.github && <> | <span><a href={data.personalInfo.github} className="text-blue-600 underline">GitHub</a></span></>}
       </div>
 
-      <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
-        Professional Summary
+      <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
+        Career Objective
       </h3>
-      <p className="text-slate-700 text-justify mb-4" dangerouslySetInnerHTML={{ __html: processBulletText(summaryText, showAdded, showOptimized) }} />
+      <p className="text-black text-justify mb-4 text-[11px] leading-relaxed" dangerouslySetInnerHTML={{ __html: processBulletText(summaryText, showAdded, showOptimized) }} />
 
-      <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
+      <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
         Technical Skills
       </h3>
       <div
-        className="text-slate-700 font-semibold mb-4 leading-loose"
+        className="text-black font-medium mb-4 leading-relaxed text-[11px]"
         dangerouslySetInnerHTML={{
           __html: data.skills
             .map(s => processBulletText(s, showAdded, showOptimized))
@@ -340,13 +340,15 @@ function ResumePaper({
               if (s.includes('<mark')) return s;
               return `<span>${s}</span>`;
             })
-            .join(' • ')
+            .join(', ')
         }}
       />
 
-      <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
-        Work Experience
-      </h3>
+      {data.experience && data.experience.length > 0 && (
+        <>
+          <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
+            Work Experience
+          </h3>
       <div className="flex flex-col gap-4">
         {data.experience.map((exp, i) => (
           <div key={i} className="flex flex-col">
@@ -370,29 +372,51 @@ function ResumePaper({
           </div>
         ))}
       </div>
+      )}
+
+      {data.education && data.education.length > 0 && (
+        <>
+          <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
+            Education
+          </h3>
+          <div className="flex flex-col gap-3 mb-4">
+            {data.education.map((edu, i) => (
+              <div key={i} className="flex flex-col text-[11px]">
+                <div className="flex justify-between items-baseline font-bold text-black">
+                  <span>{edu.degree}</span>
+                  <span>{edu.year}</span>
+                </div>
+                <div className="text-black italic">
+                  <span>{edu.school}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {data.projects && data.projects.length > 0 && (
         <>
-          <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
-            Technical Projects
+          <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
+            Projects
           </h3>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mb-4">
             {data.projects.map((proj, i) => (
-              <div key={i} className="flex flex-col">
-                <div className="flex justify-between items-baseline font-bold text-slate-900">
+              <div key={i} className="flex flex-col text-[11px]">
+                <div className="font-bold text-black mb-1">
                   <span>{proj.name}</span>
-                </div>
-                <div className="text-slate-500 text-[10px] italic mb-1.5">
-                  <span dangerouslySetInnerHTML={{ __html: processBulletText(proj.description, showAdded, showOptimized) }} />
+                  {proj.description && proj.description.trim() !== '' && (
+                    <span dangerouslySetInnerHTML={{ __html: ` | ${processBulletText(proj.description, showAdded, showOptimized)}` }} />
+                  )}
                 </div>
                 {proj.bullets && proj.bullets.length > 0 && (
-                  <ul className="list-square list-inside pl-4 text-slate-700 flex flex-col gap-1">
+                  <ul className="list-disc list-outside pl-4 ml-1 text-black flex flex-col gap-1">
                     {proj.bullets.map((b, bIdx) => {
                       const bulletText = (!showOptimized && originalData && originalData.projects[i]?.bullets[bIdx]) 
                         ? originalData.projects[i].bullets[bIdx] 
                         : b;
                       return (
-                        <li key={bIdx} className="text-justify indent-[-10px] pl-[10px]" dangerouslySetInnerHTML={{ __html: processBulletText(bulletText, showAdded, showOptimized, true) }} />
+                        <li key={bIdx} className="text-justify pl-1" dangerouslySetInnerHTML={{ __html: processBulletText(bulletText, showAdded, showOptimized, true) }} />
                       );
                     })}
                   </ul>
@@ -403,35 +427,18 @@ function ResumePaper({
         </>
       )}
 
-      <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
-        Education
-      </h3>
-      <div className="flex flex-col gap-3">
-        {data.education.map((edu, i) => (
-          <div key={i} className="flex flex-col">
-            <div className="flex justify-between items-baseline font-bold text-slate-900">
-              <span>{edu.degree}</span>
-              <span>{edu.year}</span>
-            </div>
-            <div className="text-slate-500 text-[10px] italic">
-              <span>{edu.school}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {data.certifications && data.certifications.length > 0 && (
         <>
-          <h3 className="font-title font-bold text-[11px] text-slate-900 uppercase tracking-wider border-b border-slate-300 pb-1 mt-4 mb-2.5">
+          <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
             Certifications
           </h3>
-          <ul className="list-square list-inside pl-4 text-slate-700 flex flex-col gap-1">
+          <ul className="list-disc list-outside pl-4 ml-1 text-black flex flex-col gap-1 text-[11px]">
             {data.certifications.map((cert, i) => {
               const certText = (!showOptimized && originalData?.certifications?.[i]) 
                 ? originalData.certifications[i] 
                 : cert;
               return (
-                <li key={i} className="text-justify indent-[-10px] pl-[10px]" dangerouslySetInnerHTML={{ __html: processBulletText(certText, showAdded, showOptimized) }} />
+                <li key={i} className="text-justify pl-1" dangerouslySetInnerHTML={{ __html: processBulletText(certText, showAdded, showOptimized) }} />
               );
             })}
           </ul>
