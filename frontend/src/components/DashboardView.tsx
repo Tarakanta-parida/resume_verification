@@ -27,7 +27,8 @@ export default function DashboardView() {
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/json': ['.json']
     },
     multiple: false
   });
@@ -47,8 +48,8 @@ export default function DashboardView() {
 
         <div className="flex-grow flex flex-col justify-center">
           {!(resumeName || originalResume) ? (
-            <div 
-              {...getRootProps()} 
+            <div
+              {...getRootProps()}
               className={`border-2 border-dashed border-white/10 rounded-xl p-12 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center bg-white/[0.01] hover:border-violet-500 hover:bg-violet-500/[0.02]
                 ${isDragActive ? 'border-violet-500 bg-violet-500/[0.05]' : ''}
                 ${theme === 'light' ? 'border-black/10 hover:border-violet-500 bg-black/[0.01]' : ''}
@@ -62,7 +63,7 @@ export default function DashboardView() {
                 Drag and drop your resume here
               </p>
               <p className="text-slate-400 text-xs data-[light=true]:text-slate-500" data-light={theme === 'light'}>
-                Supports PDF and DOCX formats
+                Supports PDF, DOCX, and JSON formats
               </p>
               <button className="mt-6 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-blue-500 text-white rounded-lg text-xs font-semibold shadow shadow-violet-500/20 hover:scale-[1.02] transition-transform duration-300">
                 Browse Files
@@ -83,7 +84,7 @@ export default function DashboardView() {
                   </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={removeResumeFile}
                 className="p-1.5 hover:bg-red-500/10 hover:text-red-400 text-slate-400 rounded-lg transition-colors cursor-pointer"
                 title="Remove File"
@@ -105,7 +106,7 @@ export default function DashboardView() {
         </div>
 
         <div className="flex flex-col gap-4 flex-grow min-h-[260px]">
-          <div 
+          <div
             className="flex-grow bg-slate-950/40 border border-white/5 p-5 rounded-xl transition-colors min-h-[210px] flex flex-col focus-within:border-violet-500 data-[light=true]:bg-slate-50 data-[light=true]:border-black/5"
             data-light={theme === 'light'}
           >

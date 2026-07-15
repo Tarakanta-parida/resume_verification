@@ -2,22 +2,22 @@
 
 import React from 'react';
 import { useResumeStore } from '../store/useResumeStore';
-import { 
-  LayoutDashboard, 
-  Gauge, 
-  SplitSquareHorizontal, 
-  FileCheck2, 
-  Sun, 
-  Moon, 
+import {
+  LayoutDashboard,
+  Gauge,
+  SplitSquareHorizontal,
+  FileCheck2,
+  Sun,
+  Moon,
   Sparkles
 } from 'lucide-react';
 
 export default function Sidebar() {
-  const { 
-    theme, 
-    toggleTheme, 
-    currentTab, 
-    setCurrentTab, 
+  const {
+    theme,
+    toggleTheme,
+    currentTab,
+    setCurrentTab,
     isOptimized,
     resumeName
   } = useResumeStore();
@@ -44,15 +44,15 @@ export default function Sidebar() {
         {menuItems.map(item => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
-          
+
           return (
             <button
               key={item.id}
               onClick={() => !item.disabled && setCurrentTab(item.id)}
               disabled={item.disabled}
               className={`flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 w-full text-left cursor-pointer
-                ${isActive 
-                  ? 'bg-gradient-to-r from-violet-600 to-blue-500 text-white shadow-lg shadow-violet-500/20' 
+                ${isActive
+                  ? 'bg-gradient-to-r from-violet-600 to-blue-500 text-white shadow-lg shadow-violet-500/20'
                   : theme === 'light'
                     ? 'text-slate-700 hover:bg-slate-100 hover:text-violet-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent'
@@ -69,7 +69,7 @@ export default function Sidebar() {
       <div className="mt-auto flex flex-col gap-4 pt-4 border-t border-white/10 data-[light=true]:border-black/10" data-light={theme === 'light'}>
         <div className="flex items-center justify-between p-2.5 bg-slate-800 rounded-xl text-sm font-semibold text-slate-400 data-[light=true]:bg-slate-100 data-[light=true]:text-slate-600" data-light={theme === 'light'}>
           <span className="capitalize">{theme} Theme</span>
-          <button 
+          <button
             onClick={toggleTheme}
             className="w-11 h-6 bg-slate-600 rounded-full p-0.5 transition-colors relative cursor-pointer data-[active=true]:bg-violet-600"
             data-active={theme === 'light'}

@@ -38,6 +38,11 @@ export default function Home() {
           title: 'ATS Audit Report',
           sub: 'Detailed compatibility audit report, keyword frequency check, and action items.'
         };
+      default:
+        return {
+          title: 'Resume Optimizer',
+          sub: 'Upload your resume and the target job description to match keywords and boost your score.'
+        };
     }
   };
 
@@ -66,7 +71,7 @@ export default function Home() {
               Load Template Profile:
             </span>
             <select
-              onChange={(e) => loadSampleProfile(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => loadSampleProfile(e.target.value)}
               className="bg-slate-950 border border-white/10 text-white rounded-lg px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-violet-500 cursor-pointer data-[light=true]:bg-slate-100 data-[light=true]:border-black/10 data-[light=true]:text-slate-800"
               data-light={theme === 'light'}
             >

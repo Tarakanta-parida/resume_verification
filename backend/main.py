@@ -16,17 +16,16 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from sqlalchemy.orm import Session
 import io
 import logging
-
-from app.core.config import settings
-from app.core.database import get_db, init_db
-from app.core.models import Resume, JobDescription, ATSReport, OptimizedResume
-from app.engine.pdf_parser import extract_text_from_pdf
-from app.engine.docx_parser import extract_text_from_docx
-from app.engine.ats_scorer import calculate_ats_metrics, extract_keywords_from_text
-from app.engine.prompt_layer import optimize_resume_data
-from app.engine.pdf_generator import generate_styled_resume_html
-from app.engine.docx_generator import generate_docx_from_data
-from app.engine.supabase_storage import upload_file_to_supabase
+from backend.app.core.config import settings
+from backend.app.core.database import get_db, init_db
+from backend.app.core.models import Resume, JobDescription, ATSReport, OptimizedResume
+from backend.app.engine.pdf_parser import extract_text_from_pdf
+from backend.app.engine.docx_parser import extract_text_from_docx
+from backend.app.engine.ats_scorer import calculate_ats_metrics, extract_keywords_from_text
+from backend.app.engine.prompt_layer import optimize_resume_data
+from backend.app.engine.pdf_generator import generate_styled_resume_html
+from backend.app.engine.docx_generator import generate_docx_from_data
+from backend.app.engine.supabase_storage import upload_file_to_supabase
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)
@@ -525,7 +524,7 @@ async def download_pdf(result_id: str, show_added: bool = True, show_optimized: 
     else:
         orig_data = orig_val or {}
 
-    processed_data = process_resume_data_highlights(opt_data, orig_data, show_added, show_optimized)
+    processed_data = process_resume_data_highlights(cast(dict, opt_data), cast(dict, orig_data), show_added, show_optimized)
     html_content = generate_styled_resume_html(processed_data, include_highlights=False)
     return HTMLResponse(content=html_content, status_code=200)
 
@@ -554,7 +553,7 @@ async def download_docx(result_id: str, show_added: bool = True, show_optimized:
     else:
         orig_data = orig_val or {}
     
-    processed_data = process_resume_data_highlights(opt_data, orig_data, show_added, show_optimized)
+    processed_data = process_resume_data_highlights(cast(dict, opt_data), cast(dict, orig_data), show_added, show_optimized)
     file_stream = generate_docx_from_data(processed_data)
     
     return StreamingResponse(

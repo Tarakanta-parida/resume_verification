@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import logging
-from backend.app.core.config import settings
-from backend.app.core.models import Base
+from app.core.config import settings
+from app.core.models import Base
 
 logger = logging.getLogger("ats-optimizer")
 

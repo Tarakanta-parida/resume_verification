@@ -56,7 +56,7 @@ export default function ReportView() {
             This detailed audit checks keyword density, formatting structures, and skill completeness against target candidate profiles.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-6">
           <div className="w-20 h-20 bg-white/10 rounded-full flex flex-col items-center justify-center border border-white/20">
             <span className="font-title font-extrabold text-xl leading-none">{originalScore}%</span>
@@ -85,7 +85,7 @@ export default function ReportView() {
                 <span className="text-slate-500">Original: {item.orig} | Optimized: {item.opt}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden relative data-[light=true]:bg-slate-100" data-light={theme === 'light'}>
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-violet-600 to-blue-500 rounded-full transition-all duration-1000"
                   style={{ width: `${(item.opt / 4) * 100}%` }}
                 />

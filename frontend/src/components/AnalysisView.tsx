@@ -51,7 +51,7 @@ export default function AnalysisView() {
             <span>+{diff}% Match Improvement</span>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed max-w-sm data-[light=true]:text-slate-500" data-light={theme === 'light'}>
-            {diff > 20 
+            {diff > 20
               ? `Critical gaps successfully bypassed! Adding ${missingKeywords.length} missing keywords and aligning description verbs raised match metrics to ${optimizedScore}%.`
               : `Your resume is well aligned! Incorporating missing skills pushed compatibility to ${optimizedScore}% to confidently clear ATS filters.`
             }
@@ -78,7 +78,7 @@ export default function AnalysisView() {
                   <span className="text-white data-[light=true]:text-slate-800" data-light={theme === 'light'}>{cat.current}% ➔ {potential}%</span>
                 </div>
                 <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden relative data-[light=true]:bg-slate-100" data-light={theme === 'light'}>
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-violet-600 to-blue-500 rounded-full transition-all duration-1000"
                     style={{ width: `${potential}%` }}
                   />

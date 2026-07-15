@@ -95,7 +95,7 @@ def optimize_via_openai(data: Dict[str, Any], jd: str, missing: List[str]) -> Di
         temperature=0.2,
         stream=False
     )
-    return json.loads(response.choices[0].message.content or "{}")
+    return json.loads(response.choices[0].message.content or "{}")  # type: ignore
 
 
 def optimize_via_claude(data: Dict[str, Any], jd: str, missing: List[str]) -> Dict[str, Any]:
@@ -111,7 +111,7 @@ def optimize_via_claude(data: Dict[str, Any], jd: str, missing: List[str]) -> Di
         ]
     )
     # Extracts JSON block if wrapped
-    resp_text = "".join(getattr(block, "text", "") for block in response.content)
+    resp_text = "".join(getattr(block, "text", "") for block in response.content)  # type: ignore
     return json.loads(resp_text)
 
 
@@ -221,7 +221,7 @@ Return the response ONLY in a valid JSON object matching this exact schema:
 }
 """
 
-def parse_resume_text_via_llm(raw_text: str) -> Dict[str, Any]:
+def parse_resume_text_via_llm(raw_text: str) -> Dict[str, Any] | None:
     """
     Parses raw resume text into structured JSON using LLM.
     """
@@ -258,7 +258,7 @@ def parse_resume_text_via_llm(raw_text: str) -> Dict[str, Any]:
                 temperature=0.1,
                 stream=False
             )
-            return json.loads(response.choices[0].message.content or "{}")
+            return json.loads(response.choices[0].message.content or "{}")  # type: ignore
         except Exception as e:
             logger.error(f"OpenAI parsing failed: {e}")
 
@@ -276,7 +276,7 @@ def parse_resume_text_via_llm(raw_text: str) -> Dict[str, Any]:
                 ],
                 temperature=0.1
             )
-            content_text = response.content[0].text
+            content_text = response.content[0].text  # type: ignore
             # Simple JSON extractor
             start = content_text.find('{')
             end = content_text.rfind('}') + 1
