@@ -372,8 +372,8 @@ function ResumePaper({
           </div>
         ))}
       </div>
+      </>
       )}
-
       {data.education && data.education.length > 0 && (
         <>
           <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
