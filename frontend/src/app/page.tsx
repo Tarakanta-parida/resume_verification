@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useResumeStore } from '../store/useResumeStore';
+import Sidebar from '../components/Sidebar';
 import Loader from '../components/Loader';
 import DashboardView from '../components/DashboardView';
 import AnalysisView from '../components/AnalysisView';
@@ -48,41 +49,38 @@ export default function Home() {
   const pageMeta = getPageTitle();
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-white text-slate-900 font-sans">
-      {/* Top Header */}
-      <header className="flex items-center justify-between px-8 py-4 border-b border-slate-100">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentTab('dashboard')}>
-          <div className="w-6 h-6 bg-[#0097b2] rounded flex items-center justify-center shrink-0"></div>
-          <span className="font-bold text-xl text-[#0097b2] tracking-tight">ResuMatch</span>
-        </div>
-        
-        <div className="flex items-center gap-3 bg-[#f0f9fa] border border-[#d6eef1] px-4 py-2 rounded-lg shrink-0">
-          <span className="text-sm font-semibold text-[#00829a] flex items-center gap-2">
-            📄 Template Profile:
-          </span>
-          <select
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => loadSampleProfile(e.target.value)}
-            className="bg-slate-800 border-none text-white rounded px-3 py-1.5 text-sm font-semibold focus:outline-none cursor-pointer"
-          >
-            <option value="">-- Custom Upload --</option>
-            <option value="software_engineer">Software Engineer</option>
-            <option value="data_analyst">Data Analyst</option>
-            <option value="product_manager">Product Manager</option>
-            <option value="marketing_specialist">Marketing Specialist</option>
-          </select>
-        </div>
-      </header>
+    <div className="flex flex-col lg:flex-row min-h-screen w-full bg-white text-slate-900 font-sans">
+      {/* Sidebar Navigation */}
+      <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-6xl mx-auto w-full p-8 flex flex-col">
-        {/* Page Title Header */}
-        <div className="mb-10 w-full">
-          <h1 className="font-bold text-[32px] text-slate-900 mb-2">
-            {pageMeta.title}
-          </h1>
-          <p className="text-slate-500 text-[15px]">
-            {pageMeta.sub}
-          </p>
+      <main className="lg:ml-[260px] flex-grow w-full p-4 md:p-8 flex flex-col overflow-x-hidden">
+        {/* Page Title & Profile Header */}
+        <div className="mb-8 w-full flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="font-bold text-[32px] text-slate-900 mb-1">
+              {pageMeta.title}
+            </h1>
+            <p className="text-slate-500 text-[15px]">
+              {pageMeta.sub}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 bg-[#f0f9fa] border border-[#d6eef1] px-4 py-2 rounded-lg shrink-0">
+            <span className="text-sm font-semibold text-[#00829a] flex items-center gap-2">
+              📄 Template Profile:
+            </span>
+            <select
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => loadSampleProfile(e.target.value)}
+              className="bg-slate-800 border-none text-white rounded px-3 py-1.5 text-sm font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value="">-- Custom Upload --</option>
+              <option value="software_engineer">Software Engineer</option>
+              <option value="data_analyst">Data Analyst</option>
+              <option value="product_manager">Product Manager</option>
+              <option value="marketing_specialist">Marketing Specialist</option>
+            </select>
+          </div>
         </div>
 
         {/* Render Active Tab Views */}
