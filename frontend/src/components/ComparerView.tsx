@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useResumeStore, ResumeData } from '../store/useResumeStore';
+import { useResumeStore, ResumeData, API_BASE_URL } from '../store/useResumeStore';
 import { FileText, CircleCheck, FileDown } from 'lucide-react';
 
 // Helper function to process bullet text based on active highlights
@@ -106,12 +106,12 @@ export default function ComparerView() {
   const exportPDF = () => {
     if (!resultId) return;
     // Open the print-ready HTML page from FastAPI in a new tab
-    window.open(`http://localhost:8080/api/v1/optimize/${resultId}/download-pdf?show_added=${showAdded}&show_optimized=${showOptimized}`, '_blank');
+    window.open(`${API_BASE_URL}/optimize/${resultId}/download-pdf?show_added=${showAdded}&show_optimized=${showOptimized}`, '_blank');
   };
 
   const exportDocx = () => {
     if (!resultId) return;
-    window.location.href = `http://localhost:8080/api/v1/optimize/${resultId}/download-docx?show_added=${showAdded}&show_optimized=${showOptimized}`;
+    window.location.href = `${API_BASE_URL}/optimize/${resultId}/download-docx?show_added=${showAdded}&show_optimized=${showOptimized}`;
   };
 
   const exportPlainTxt = () => {

@@ -73,6 +73,9 @@ interface ResumeState {
 }
 
 const getApiBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
   if (typeof window !== 'undefined') {
     if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
       return '/api/v1';
@@ -81,7 +84,7 @@ const getApiBaseUrl = () => {
   return 'http://localhost:8080/api/v1';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 export const useResumeStore = create<ResumeState>((set, get) => ({
   theme: 'dark',
