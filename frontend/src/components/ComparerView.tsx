@@ -330,19 +330,17 @@ function ResumePaper({
       <h3 className="font-bold text-[14px] text-black border-b border-black pb-0.5 mt-4 mb-2">
         Technical Skills
       </h3>
-      <div
-        className="text-black font-medium mb-4 leading-relaxed text-[11px]"
-        dangerouslySetInnerHTML={{
-          __html: data.skills
-            .map(s => processBulletText(s, showAdded, showOptimized))
-            .filter(s => s.trim().length > 0)
-            .map(s => {
-              if (s.includes('<mark')) return s;
-              return `<span>${s}</span>`;
-            })
-            .join(', ')
-        }}
-      />
+      <div className="flex flex-col gap-0.5 mb-4 text-[11px] text-black">
+        {data.skills
+          .map(s => processBulletText(s, showAdded, showOptimized))
+          .filter(s => s.trim().length > 0)
+          .map((s, idx) => {
+            const formattedSkill = s.replace(/^([^:]+:)/, '<strong>$1</strong>');
+            return (
+              <div key={idx} dangerouslySetInnerHTML={{ __html: formattedSkill }} />
+            );
+          })}
+      </div>
 
       {data.experience && data.experience.length > 0 && (
         <>
@@ -386,8 +384,19 @@ function ResumePaper({
                   <span>{edu.degree}</span>
                   <span>{edu.year}</span>
                 </div>
-                <div className="text-black italic">
-                  <span>{edu.school}</span>
+                <div className="text-black flex justify-between items-baseline">
+                  {(() => {
+                    const match = edu.school.match(/(.*?)\s+(CGPA:.*|Percentage:.*)$/i);
+                    if (match) {
+                      return (
+                        <>
+                          <span>{match[1]}</span>
+                          <span>{match[2]}</span>
+                        </>
+                      );
+                    }
+                    return <span>{edu.school}</span>;
+                  })()}
                 </div>
               </div>
             ))}
