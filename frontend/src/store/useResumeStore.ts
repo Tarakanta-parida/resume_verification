@@ -196,7 +196,10 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         body: formData
       });
       
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errData = await response.text();
+        throw new Error(`Upload failed (${response.status}): ${errData}`);
+      }
       const data = await response.json();
       
       set({
@@ -205,9 +208,9 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         originalResume: data.structured_json,
         isOptimized: false
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('File upload failed. Ensure the FastAPI backend is running on port 8080.');
+      alert(`File upload failed. Error: ${err.message || 'Network error (Backend might be waking up)'}`);
     } finally {
       set({ isLoading: false });
     }
