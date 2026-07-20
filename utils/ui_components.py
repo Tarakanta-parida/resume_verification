@@ -164,6 +164,26 @@ div[data-testid="stCheckbox"] label span {{
     font-weight: 600 !important;
 }}
 
+div[data-testid="stCheckbox"] label > div,
+div[data-baseweb="checkbox"] > div,
+span[data-baseweb="checkbox"] {{
+    border-radius: 6px !important;
+}}
+
+div[data-testid="stCheckbox"] input:checked + div,
+div[data-baseweb="checkbox"] [aria-checked="true"] > div,
+div[data-baseweb="checkbox"] > div[aria-checked="true"] {{
+    background-color: #8b5cf6 !important;
+    border-color: #8b5cf6 !important;
+}}
+
+div[data-testid="stCheckbox"] svg,
+div[data-baseweb="checkbox"] svg {{
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}}
+
 p, span, label, h1, h2, h3, h4, h5, h6 {{
     color: {text_color};
 }}
