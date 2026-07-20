@@ -78,25 +78,41 @@ div[data-testid="stSelectbox"] *,
 div[data-baseweb="select"] *,
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] div,
+div[data-baseweb="select"] input,
 div[data-baseweb="select"] svg {{
     color: {text_color} !important;
     fill: {text_color} !important;
+    -webkit-text-fill-color: {text_color} !important;
 }}
 
-/* Dropdown Options Popup */
-ul[role="listbox"], div[data-baseweb="popover"], div[data-baseweb="menu"] {{
+/* BaseWeb Selectbox Dropdown Menu Popover */
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[data-baseweb="menu"],
+div[data-baseweb="menu"] > div,
+ul[role="listbox"],
+[data-testid="stSelectboxVirtualDropdown"] {{
     background-color: {card_bg} !important;
     color: {text_color} !important;
     border: 1px solid {card_border} !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
+    box-shadow: {"0 10px 30px rgba(0,0,0,0.12)" if is_light else "0 10px 30px rgba(0,0,0,0.5)"} !important;
 }}
 
-ul[role="listbox"] li, div[data-baseweb="menu"] li {{
+div[data-baseweb="popover"] *,
+div[data-baseweb="menu"] *,
+ul[role="listbox"] *,
+div[role="option"] {{
     background-color: {card_bg} !important;
     color: {text_color} !important;
+    -webkit-text-fill-color: {text_color} !important;
 }}
 
-ul[role="listbox"] li:hover, div[data-baseweb="menu"] li:hover {{
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="menu"] li:hover,
+ul[role="listbox"] li:hover,
+ul[role="listbox"] [aria-selected="true"],
+div[role="option"]:hover {{
     background-color: {btn_sec_hover_bg} !important;
 }}
 
