@@ -11,12 +11,19 @@ def inject_custom_css(theme: str = "dark"):
     is_light = (theme == "light")
     
     bg_color = "#f8fafc" if is_light else "#020617"
+    sidebar_bg = "#ffffff" if is_light else "#090d16"
     text_color = "#0f172a" if is_light else "#f8fafc"
     card_bg = "#ffffff" if is_light else "rgba(15, 23, 42, 0.6)"
-    card_border = "rgba(0, 0, 0, 0.08)" if is_light else "rgba(255, 255, 255, 0.08)"
-    sub_text = "#64748b" if is_light else "#94a3b8"
-    input_bg = "#f1f5f9" if is_light else "#090d16"
+    card_border = "#e2e8f0" if is_light else "rgba(255, 255, 255, 0.08)"
+    sub_text = "#475569" if is_light else "#94a3b8"
+    input_bg = "#ffffff" if is_light else "#090d16"
+    input_border = "#cbd5e1" if is_light else "rgba(255, 255, 255, 0.12)"
     
+    btn_sec_bg = "#ffffff" if is_light else "rgba(255, 255, 255, 0.05)"
+    btn_sec_text = "#0f172a" if is_light else "#f8fafc"
+    btn_sec_border = "#cbd5e1" if is_light else "rgba(255, 255, 255, 0.1)"
+    btn_sec_hover_bg = "#f1f5f9" if is_light else "rgba(255, 255, 255, 0.1)"
+
     css = f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -35,10 +42,11 @@ header[data-testid="stHeader"] {{
 }}
 
 section[data-testid="stSidebar"] {{
-    background-color: {"#ffffff" if is_light else "#090d16"} !important;
+    background-color: {sidebar_bg} !important;
     border-right: 1px solid {card_border} !important;
 }}
 
+/* Cards */
 .resumatch-card {{
     background-color: {card_bg};
     border: 1px solid {card_border};
@@ -51,6 +59,73 @@ section[data-testid="stSidebar"] {{
 
 .resumatch-card:hover {{
     border-color: rgba(139, 92, 246, 0.4);
+}}
+
+/* Form Controls & Inputs */
+.stTextArea textarea, .stTextInput input, div[data-baseweb="select"] > div {{
+    background-color: {input_bg} !important;
+    color: {text_color} !important;
+    border: 1px solid {input_border} !important;
+    border-radius: 10px !important;
+}}
+
+.stTextArea textarea::placeholder, .stTextInput input::placeholder {{
+    color: #94a3b8 !important;
+}}
+
+.stFileUploader > div {{
+    background-color: {card_bg} !important;
+    border: 1px dashed {input_border} !important;
+    border-radius: 12px !important;
+    color: {text_color} !important;
+}}
+
+/* Checkbox & Labels */
+div[data-testid="stCheckbox"] label span {{
+    color: {text_color} !important;
+    font-weight: 600 !important;
+}}
+
+p, span, label, h1, h2, h3, h4, h5, h6 {{
+    color: {text_color};
+}}
+
+.stMarkdown p {{
+    color: {text_color};
+}}
+
+/* Buttons Styling */
+div.stButton > button {{
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+}}
+
+/* Secondary Buttons */
+div.stButton > button[kind="secondary"] {{
+    background-color: {btn_sec_bg} !important;
+    color: {btn_sec_text} !important;
+    border: 1px solid {btn_sec_border} !important;
+    box-shadow: {"0 1px 3px rgba(0,0,0,0.05)" if is_light else "none"} !important;
+}}
+
+div.stButton > button[kind="secondary"]:hover {{
+    background-color: {btn_sec_hover_bg} !important;
+    border-color: #8b5cf6 !important;
+    color: #8b5cf6 !important;
+}}
+
+/* Primary Buttons */
+div.stButton > button[kind="primary"] {{
+    background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3) !important;
+}}
+
+div.stButton > button[kind="primary"]:hover {{
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4) !important;
 }}
 
 .gauge-container {{
@@ -70,7 +145,7 @@ section[data-testid="stSidebar"] {{
     justify-content: center;
     background: {input_bg};
     position: relative;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
 }}
 
 .gauge-value {{
@@ -137,7 +212,7 @@ mark.mod {{
     color: #1e293b;
     padding: 36px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
     border: 1px solid #e2e8f0;
     font-size: 12px;
     line-height: 1.6;
@@ -163,6 +238,9 @@ def render_gauge(score: int, label: str, color: str = "#8b5cf6"):
 
 def render_header_banner(title: str, subtitle: str):
     """Renders the top title banner."""
+    is_light = (st.session_state.get("theme") == "light")
+    sub_color = "#475569" if is_light else "#94a3b8"
+
     html = f"""
 <div style="margin-bottom: 24px;">
     <h1 style="font-size: 32px; font-weight: 800; tracking: -0.5px; margin-bottom: 6px;
@@ -170,7 +248,7 @@ def render_header_banner(title: str, subtitle: str):
                -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
         {title}
     </h1>
-    <p style="font-size: 14px; color: #94a3b8; max-width: 650px; margin: 0;">
+    <p style="font-size: 14px; color: {sub_color}; max-width: 650px; margin: 0; font-weight: 500;">
         {subtitle}
     </p>
 </div>
