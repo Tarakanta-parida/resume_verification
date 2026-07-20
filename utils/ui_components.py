@@ -62,14 +62,23 @@ section[data-testid="stSidebar"] {{
 }}
 
 /* Form Controls & Inputs */
-.stTextArea textarea, .stTextInput input, div[data-baseweb="select"] > div, div[role="combobox"] {{
+.stTextArea textarea, .stTextInput input, 
+div[data-testid="stSelectbox"] > div,
+div[data-baseweb="select"],
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] > div > div,
+div[role="combobox"] {{
     background-color: {input_bg} !important;
     color: {text_color} !important;
     border: 1px solid {input_border} !important;
     border-radius: 10px !important;
 }}
 
-div[data-baseweb="select"] span, div[data-baseweb="select"] div, div[data-baseweb="select"] svg {{
+div[data-testid="stSelectbox"] *,
+div[data-baseweb="select"] *,
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div,
+div[data-baseweb="select"] svg {{
     color: {text_color} !important;
     fill: {text_color} !important;
 }}
