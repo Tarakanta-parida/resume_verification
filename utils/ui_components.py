@@ -62,22 +62,73 @@ section[data-testid="stSidebar"] {{
 }}
 
 /* Form Controls & Inputs */
-.stTextArea textarea, .stTextInput input, div[data-baseweb="select"] > div {{
+.stTextArea textarea, .stTextInput input, div[data-baseweb="select"] > div, div[role="combobox"] {{
     background-color: {input_bg} !important;
     color: {text_color} !important;
     border: 1px solid {input_border} !important;
     border-radius: 10px !important;
 }}
 
+div[data-baseweb="select"] span, div[data-baseweb="select"] div, div[data-baseweb="select"] svg {{
+    color: {text_color} !important;
+    fill: {text_color} !important;
+}}
+
+/* Dropdown Options Popup */
+ul[role="listbox"], div[data-baseweb="popover"], div[data-baseweb="menu"] {{
+    background-color: {card_bg} !important;
+    color: {text_color} !important;
+    border: 1px solid {card_border} !important;
+    border-radius: 10px !important;
+}}
+
+ul[role="listbox"] li, div[data-baseweb="menu"] li {{
+    background-color: {card_bg} !important;
+    color: {text_color} !important;
+}}
+
+ul[role="listbox"] li:hover, div[data-baseweb="menu"] li:hover {{
+    background-color: {btn_sec_hover_bg} !important;
+}}
+
 .stTextArea textarea::placeholder, .stTextInput input::placeholder {{
     color: #94a3b8 !important;
 }}
 
-.stFileUploader > div {{
+/* File Uploader Dropzone */
+[data-testid="stFileUploaderDropzone"], div[data-testid="stFileUploader"] > section {{
     background-color: {card_bg} !important;
     border: 1px dashed {input_border} !important;
     border-radius: 12px !important;
     color: {text_color} !important;
+}}
+
+[data-testid="stFileUploaderDropzone"] *, [data-testid="stFileUploaderDropzone"] span {{
+    color: {text_color} !important;
+}}
+
+[data-testid="stFileUploaderDropzone"] button, section[data-testid="stFileUploaderDropzone"] button, button[data-testid="stBaseButton-secondary"] {{
+    background-color: {btn_sec_bg} !important;
+    color: {btn_sec_text} !important;
+    border: 1px solid {btn_sec_border} !important;
+}}
+
+[data-testid="stFileUploaderDropzone"] button:hover {{
+    background-color: {btn_sec_hover_bg} !important;
+    border-color: #8b5cf6 !important;
+    color: #8b5cf6 !important;
+}}
+
+/* Info Callout Banner */
+div[data-testid="stInfo"] {{
+    background-color: {"rgba(59, 130, 246, 0.08)" if is_light else "rgba(59, 130, 246, 0.12)"} !important;
+    color: {"#1e40af" if is_light else "#60a5fa"} !important;
+    border: 1px solid {"rgba(59, 130, 246, 0.25)" if is_light else "rgba(59, 130, 246, 0.3)"} !important;
+    border-radius: 10px !important;
+}}
+
+div[data-testid="stInfo"] * {{
+    color: {"#1e40af" if is_light else "#60a5fa"} !important;
 }}
 
 /* Checkbox & Labels */
