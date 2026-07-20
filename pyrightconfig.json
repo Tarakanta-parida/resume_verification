@@ -1,9 +1,0 @@
-{
-    "venvPath": "c:\\Users\\Dell\\OneDrive\\Desktop\\resume_verification\\backend",
-    "venv": ".venv",
-    "pythonVersion": "3.13",
-    "extraPaths": [
-        "c:\\Users\\Dell\\OneDrive\\Desktop\\resume_verification\\backend\\.venv\\Lib\\site-packages",
-        "c:\\Users\\Dell\\OneDrive\\Desktop\\resume_verification\\backend"
-    ]
-}
