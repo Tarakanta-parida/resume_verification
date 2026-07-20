@@ -67,6 +67,7 @@ section[data-testid="stSidebar"] {{
 /* Form Controls & Inputs */
 .stTextArea textarea, .stTextInput input, 
 div[data-testid="stSelectbox"] > div,
+div[data-baseweb="select"],
 div[data-baseweb="select"] > div {{
     background-color: {input_bg} !important;
     color: {text_color} !important;
@@ -74,22 +75,30 @@ div[data-baseweb="select"] > div {{
     border-radius: 10px !important;
 }}
 
-div[data-testid="stSelectbox"] > div div,
-div[data-baseweb="select"] div {{
+/* Strictly strip background, border, and box-shadow from all inner selectbox children */
+div[data-testid="stSelectbox"] div,
+div[data-testid="stSelectbox"] span,
+div[data-testid="stSelectbox"] input,
+div[data-testid="stSelectbox"] button,
+div[data-baseweb="select"] div,
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] input,
+div[data-baseweb="select"] button,
+div[data-baseweb="icon"],
+div[data-baseweb="icon"] * {{
     background-color: transparent !important;
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
-}}
-
-div[data-testid="stSelectbox"] *,
-div[data-baseweb="select"] *,
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] div,
-div[data-baseweb="select"] input,
-div[data-baseweb="select"] svg {{
     color: {text_color} !important;
     fill: {text_color} !important;
     -webkit-text-fill-color: {text_color} !important;
+}}
+
+div[data-testid="stSelectbox"] svg,
+div[data-baseweb="select"] svg {{
+    fill: {text_color} !important;
+    color: {text_color} !important;
 }}
 
 /* BaseWeb Selectbox Dropdown Menu Popover */
