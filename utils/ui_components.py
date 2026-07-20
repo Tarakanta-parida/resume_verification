@@ -66,14 +66,19 @@ section[data-testid="stSidebar"] {{
 
 /* Form Controls & Inputs */
 .stTextArea textarea, .stTextInput input, 
-div[data-testid="stSelectbox"] div,
-div[data-baseweb="select"],
-div[data-baseweb="select"] div,
-div[role="combobox"] {{
+div[data-testid="stSelectbox"] > div,
+div[data-baseweb="select"] > div {{
     background-color: {input_bg} !important;
     color: {text_color} !important;
     border: 1px solid {input_border} !important;
     border-radius: 10px !important;
+}}
+
+div[data-testid="stSelectbox"] > div div,
+div[data-baseweb="select"] div {{
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }}
 
 div[data-testid="stSelectbox"] *,
