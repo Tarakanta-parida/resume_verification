@@ -45,6 +45,7 @@ def render_dashboard_view():
             st.session_state.jd_textarea = sample_jd
             st.session_state.original_resume = SAMPLE_RESUMES.get(str(selected_template), None)
             st.session_state.resume_name = f"{selected_template}_Sample_Resume.docx"
+            st.session_state.resume_id = None
             st.session_state.is_optimized = False
             st.session_state.optimized_resume = None
             st.rerun()
@@ -143,25 +144,35 @@ def render_dashboard_view():
                 try:
                     db = SessionLocal()
                     try:
-                        # 1. Save JD
+                        parsed_data = st.session_state.original_resume
+                        resume_text = json.dumps(parsed_data)
+                        jd_text = st.session_state.jd_text
+
+                        # 1. Ensure Resume DB record exists
+                        resume_id = st.session_state.get("resume_id")
+                        if not resume_id:
+                            resume_rec = Resume(resume_url="sample://loaded", parsed_json=parsed_data)
+                            db.add(resume_rec)
+                            db.commit()
+                            db.refresh(resume_rec)
+                            resume_id = resume_rec.id
+                            st.session_state.resume_id = resume_id
+
+                        # 2. Save JD
                         jd_rec = JobDescription(jd_text=st.session_state.jd_text)
                         db.add(jd_rec)
                         db.commit()
                         db.refresh(jd_rec)
 
-                        parsed_data = st.session_state.original_resume
-                        resume_text = json.dumps(parsed_data)
-                        jd_text = st.session_state.jd_text
-
-                        # 2. Compute metrics
+                        # 3. Compute metrics
                         metrics = calculate_ats_metrics(resume_text, jd_text)
 
-                        # 3. AI Optimization
+                        # 4. AI Optimization
                         optimized_json = optimize_resume_data(parsed_data, jd_text, metrics["missing_keywords"])
 
-                        # 4. Save ATS Report
+                        # 5. Save ATS Report
                         report_rec = ATSReport(
-                            resume_id=st.session_state.get("resume_id", "sample"),
+                            resume_id=resume_id,
                             jd_id=jd_rec.id,
                             ats_score=metrics["original_score"],
                             match_score=metrics["potential_score"],
