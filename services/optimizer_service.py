@@ -17,18 +17,21 @@ try:
 except ImportError:
     Anthropic = None
 
+from services.ats_service import extract_keywords_from_text
+
 logger = logging.getLogger("ats-optimizer")
 
 SYSTEM_INSTRUCTION = """
 You are an expert Applicant Tracking System (ATS) Resume Optimizer. 
-Your task is to review a candidate's resume data and optimize it to align with the target Job Description (JD).
+Your task is to review a candidate's resume data and optimize it to align strictly with the target Job Description (JD).
 
 RULES:
 1. Inject missing keywords from the JD naturally into the "Summary", "Skills", and "Experience" sections.
 2. Re-word bullet points in the "Experience" and "Projects" sections using strong action verbs (e.g., Spearheaded, Developed, Optimized) and add realistic quantitative metrics (e.g., "improving performance by 25%", "cutting API latency by 40%") where appropriate.
-3. CRITICAL: Do NOT alter the layout, formatting, names, contact info, companies, durations, degree titles, or graduation years.
-4. Do NOT hallucinate completely false jobs or credentials. Keep the core work history factual.
-5. Return the response ONLY in a valid JSON object matching the exact keys provided in the input resume. Include HTML `<mark class="add" data-tooltip="Embedded keyword">WORD</mark>` tags for any added keywords and `<mark class="mod" data-tooltip="Optimized for ATS metrics">SENTENCE</mark>` for modified sentences.
+3. REMOVE / PRUNE skills and bullet items from the candidate's original resume that are irrelevant or not mentioned/required in the target Job Description to maximize ATS match density.
+4. CRITICAL: Do NOT alter the layout, formatting, names, contact info, companies, durations, degree titles, or graduation years.
+5. Do NOT hallucinate completely false jobs or credentials. Keep the core work history factual.
+6. Return the response ONLY in a valid JSON object matching the exact keys provided in the input resume. Include HTML `<mark class="add" data-tooltip="Embedded keyword">WORD</mark>` tags for any added keywords and `<mark class="mod" data-tooltip="Optimized for ATS metrics">SENTENCE</mark>` for modified sentences.
 
 Input JSON format:
 {
@@ -48,7 +51,7 @@ def optimize_resume_data(resume_structure: Dict[str, Any], jd_text: str, missing
     and falls back to a rule-based regex optimizer if no keys are found.
     """
     # 1. Check Gemini
-    if os.getenv("GEMINI_API_KEY"):
+    if genai and os.getenv("GEMINI_API_KEY"):
         try:
             logger.info("Using Google Gemini API for optimization...")
             return optimize_via_gemini(resume_structure, jd_text, missing_keywords)
@@ -56,7 +59,7 @@ def optimize_resume_data(resume_structure: Dict[str, Any], jd_text: str, missing
             logger.error(f"Gemini API failed: {e}")
 
     # 2. Check OpenAI
-    if os.getenv("OPENAI_API_KEY"):
+    if OpenAI and os.getenv("OPENAI_API_KEY"):
         try:
             logger.info("Using OpenAI GPT API for optimization...")
             return optimize_via_openai(resume_structure, jd_text, missing_keywords)
@@ -64,7 +67,7 @@ def optimize_resume_data(resume_structure: Dict[str, Any], jd_text: str, missing
             logger.error(f"OpenAI API failed: {e}")
 
     # 3. Check Anthropic
-    if os.getenv("CLAUDE_API_KEY"):
+    if Anthropic and os.getenv("CLAUDE_API_KEY"):
         try:
             logger.info("Using Anthropic Claude API for optimization...")
             return optimize_via_claude(resume_structure, jd_text, missing_keywords)
@@ -73,7 +76,7 @@ def optimize_resume_data(resume_structure: Dict[str, Any], jd_text: str, missing
 
     # 4. Fallback: Local rule-based optimization
     logger.info("No LLM API keys found. Falling back to local rule-based optimization engine.")
-    return local_rule_based_optimize(resume_structure, missing_keywords)
+    return local_rule_based_optimize(resume_structure, jd_text, missing_keywords)
 
 
 def optimize_via_gemini(data: Dict[str, Any], jd: str, missing: List[str]) -> Dict[str, Any]:
@@ -122,12 +125,12 @@ def optimize_via_claude(data: Dict[str, Any], jd: str, missing: List[str]) -> Di
     return json.loads(resp_text)
 
 
-def local_rule_based_optimize(data: Dict[str, Any], missing: List[str]) -> Dict[str, Any]:
-    """Performs dynamic rule-based replacements to simulate LLM optimizer output."""
+def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[str]) -> Dict[str, Any]:
+    """Performs dynamic rule-based replacements and removes irrelevant skills to align with JD."""
     optimized = {
         "personalInfo": data.get("personalInfo") or {},
         "summary": data.get("summary") or "",
-        "skills": list(data.get("skills") or []),
+        "skills": [],
         "experience": [],
         "projects": [],
         "education": data.get("education") or [],
@@ -135,7 +138,7 @@ def local_rule_based_optimize(data: Dict[str, Any], missing: List[str]) -> Dict[
     }
 
     # 1. Optimize summary
-    sum_text = optimized["summary"]
+    sum_text = data.get("summary") or ""
     if missing:
         top_kws = missing[:2]
         kw_marks = " and ".join([f'<mark class="add" data-tooltip="Embedded target keyword">{k}</mark>' for k in top_kws])
@@ -143,9 +146,27 @@ def local_rule_based_optimize(data: Dict[str, Any], missing: List[str]) -> Dict[
     else:
         optimized["summary"] = f"Results-driven specialist with a proven track record. {sum_text}"
 
-    # 2. Append missing skills
+    # 2. Filter original skills: prune skills that are completely unmentioned/unrelated in JD
+    jd_keywords = extract_keywords_from_text(jd_text) if jd_text else set()
+    orig_skills = list(data.get("skills") or [])
+
+    relevant_skills = []
+    for s in orig_skills:
+        s_clean = s.lower().strip()
+        # Keep if skill overlaps with JD keywords or appears in JD text
+        if not jd_text or any(k in s_clean or s_clean in k for k in jd_keywords) or any(w in jd_text.lower() for w in s_clean.split() if len(w) > 2):
+            relevant_skills.append(s)
+
+    # Fallback if filtering removed all skills
+    if not relevant_skills:
+        relevant_skills = orig_skills
+
+    optimized["skills"] = relevant_skills
+
+    # Append missing JD target skills
     for m in missing[:5]:
-        optimized["skills"].append(f'<mark class="add" data-tooltip="Added missing skill found in Job Description">{m}</mark>')
+        if not any(m.lower() in str(sk).lower() for sk in optimized["skills"]):
+            optimized["skills"].append(f'<mark class="add" data-tooltip="Added missing skill found in Job Description">{m}</mark>')
 
     # 3. Optimize experience
     for idx, exp in enumerate(data.get("experience") or []):
