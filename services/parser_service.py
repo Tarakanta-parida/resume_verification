@@ -3,16 +3,37 @@ import re
 import json
 import logging
 from typing import Dict, Any, Optional
-import pdfplumber
-import docx
-from google import genai
-from openai import OpenAI
-from anthropic import Anthropic
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
+
+try:
+    import docx
+except ImportError:
+    docx = None
+
+try:
+    from google import genai
+except ImportError:
+    genai = None
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None
 
 logger = logging.getLogger("ats-optimizer")
 
 def extract_text_from_pdf(file_path: str) -> str:
     """Extracts text from a PDF file using pdfplumber."""
+    if not pdfplumber:
+        raise Exception("pdfplumber library is not installed in the current Python environment.")
     text = ""
     try:
         with pdfplumber.open(file_path) as pdf:
@@ -28,6 +49,8 @@ def extract_text_from_pdf(file_path: str) -> str:
 
 def extract_text_from_docx(file_path: str) -> str:
     """Extracts text from a DOCX file using python-docx."""
+    if not docx:
+        raise Exception("python-docx library is not installed in the current Python environment.")
     try:
         doc = docx.Document(file_path)
         text_runs = []
@@ -92,7 +115,7 @@ Return the response ONLY in a valid JSON object matching this exact schema:
 def parse_resume_text_via_llm(raw_text: str) -> Optional[Dict[str, Any]]:
     """Parses raw resume text into structured JSON using LLM APIs."""
     # 1. Try Gemini
-    if os.getenv("GEMINI_API_KEY"):
+    if genai and os.getenv("GEMINI_API_KEY"):
         try:
             logger.info("Using Google Gemini API for parsing...")
             client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -110,7 +133,7 @@ def parse_resume_text_via_llm(raw_text: str) -> Optional[Dict[str, Any]]:
             logger.error(f"Gemini parsing failed: {e}")
 
     # 2. Try OpenAI
-    if os.getenv("OPENAI_API_KEY"):
+    if OpenAI and os.getenv("OPENAI_API_KEY"):
         try:
             logger.info("Using OpenAI GPT API for parsing...")
             client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -129,7 +152,7 @@ def parse_resume_text_via_llm(raw_text: str) -> Optional[Dict[str, Any]]:
             logger.error(f"OpenAI parsing failed: {e}")
 
     # 3. Try Claude
-    if os.getenv("CLAUDE_API_KEY"):
+    if Anthropic and os.getenv("CLAUDE_API_KEY"):
         try:
             logger.info("Using Anthropic Claude API for parsing...")
             client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))

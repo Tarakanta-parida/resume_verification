@@ -2,9 +2,20 @@ import os
 import json
 import logging
 from typing import Dict, Any, List
-from google import genai
-from openai import OpenAI
-from anthropic import Anthropic
+try:
+    from google import genai
+except ImportError:
+    genai = None
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None
 
 logger = logging.getLogger("ats-optimizer")
 
