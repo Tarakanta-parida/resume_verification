@@ -20,7 +20,8 @@ def render_dashboard_view():
     def format_template_option(option: str) -> str:
         options_map = {
             "-- Custom Upload --": "📁 Custom Upload",
-            "software_engineer": "💻 Software Engineer",
+            "fresher_software_engineer": "🎓 Fresher Software Engineer",
+            "software_engineer": "💻 Experienced Software Engineer",
             "data_analyst": "📊 Data Analyst",
             "product_manager": "🚀 Product Manager",
             "marketing_specialist": "📢 Marketing Specialist"
@@ -32,14 +33,16 @@ def render_dashboard_view():
     with col_t2:
         selected_template = st.selectbox(
             "Load Sample Candidate Profile:",
-            options=["-- Custom Upload --", "software_engineer", "data_analyst", "product_manager", "marketing_specialist"],
+            options=["-- Custom Upload --", "fresher_software_engineer", "software_engineer", "data_analyst", "product_manager", "marketing_specialist"],
             format_func=format_template_option,
             key="sample_profile_select"
         )
 
         if selected_template and selected_template != "-- Custom Upload --" and st.session_state.get("last_selected_template") != selected_template:
             st.session_state.last_selected_template = selected_template
-            st.session_state.jd_text = SAMPLE_JDS.get(str(selected_template), "")
+            sample_jd = SAMPLE_JDS.get(str(selected_template), "")
+            st.session_state.jd_text = sample_jd
+            st.session_state.jd_textarea = sample_jd
             st.session_state.original_resume = SAMPLE_RESUMES.get(str(selected_template), None)
             st.session_state.resume_name = f"{selected_template}_Sample_Resume.docx"
             st.session_state.is_optimized = False

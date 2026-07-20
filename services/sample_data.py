@@ -1,6 +1,21 @@
 from typing import Dict, Any
 
 SAMPLE_JDS: Dict[str, str] = {
+    "fresher_software_engineer": """Role: Associate / Graduate Software Engineer (Fresher)
+
+Key Responsibilities:
+- Design, develop, test, and deploy clean, maintainable web application code.
+- Collaborate with senior developers, participating in peer code reviews and Agile sprint meetings.
+- Build RESTful APIs and database schemas using Node.js, Express, Python, or Java.
+- Develop interactive, responsive frontend user interfaces using React, HTML5, CSS3, and JavaScript (ES6+).
+- Write automated unit and integration tests using Jest or PyTest.
+
+Required Qualifications & Key Skills:
+- Bachelor's degree in Computer Science, Information Technology, or relevant field (2023/2024/2025 graduate).
+- Solid foundational knowledge of Data Structures, Algorithms, Object-Oriented Programming (OOP), and DBMS (SQL, PostgreSQL, MySQL).
+- Exposure to Git version control, GitHub, Docker containers, and cloud fundamentals (AWS/GCP).
+- Strong problem-solving mindset, eager to learn new technologies, and excellent verbal & written communication skills.""",
+
     "software_engineer": """Role: Senior Software Engineer (Frontend/Fullstack)
 
 Requirements:
@@ -43,6 +58,48 @@ Requirements:
 }
 
 SAMPLE_RESUMES: Dict[str, Dict[str, Any]] = {
+    "fresher_software_engineer": {
+        "personalInfo": {
+            "name": "Rohan Sharma",
+            "email": "rohan.sharma@email.com",
+            "phone": "+91 98765 43210",
+            "github": "github.com/rohan-dev",
+            "linkedin": "linkedin.com/in/rohansharma-dev"
+        },
+        "summary": "Recent Computer Science Graduate with strong fundamentals in algorithms, data structures, and web development. Passionate about software engineering, building web apps with React and Python, and learning modern cloud technologies.",
+        "skills": ["JavaScript", "Python", "React", "HTML5", "CSS3", "Git", "GitHub", "SQL", "MySQL", "OOP", "Data Structures"],
+        "experience": [
+            {
+                "role": "Software Developer Intern",
+                "company": "TechStart Innovations",
+                "duration": "Jan 2024 - Jun 2024",
+                "bullets": [
+                    "Assisted in developing frontend React components for an internal admin dashboard.",
+                    "Created basic Python and SQL scripts for database migrations and testing.",
+                    "Participated in code reviews and daily standup meetings with senior engineers."
+                ]
+            }
+        ],
+        "projects": [
+            {
+                "name": "E-Commerce Web Portal",
+                "description": "Fullstack web application created as a capstone project.",
+                "bullets": [
+                    "Implemented user authentication and product catalog listing using React and Node.js.",
+                    "Configured MySQL database tables to store order history and user profiles."
+                ]
+            }
+        ],
+        "education": [
+            {
+                "degree": "B.Tech in Computer Science & Engineering",
+                "school": "Institute of Technology",
+                "year": "2024"
+            }
+        ],
+        "certifications": ["Git & GitHub Essentials", "Python Programming Specialist"]
+    },
+
     "software_engineer": {
         "personalInfo": {
             "name": "Alex Johnson",
