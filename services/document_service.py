@@ -11,6 +11,18 @@ def clean_html_tags(text: str) -> str:
         return ""
     return re.sub(r'</?[a-zA-Z]+(?:\s+[^>]*)?>', '', text)
 
+def clean_contact_value(val: str) -> str:
+    if not val:
+        return ""
+    # Strip leading/trailing spaces, dashes, colons, vertical bars, bullets
+    cleaned = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', val)
+    cleaned = cleaned.strip()
+    # Hide default placeholders
+    lower_val = cleaned.lower()
+    if "linkedin.com/in/user" in lower_val or "github.com/user" in lower_val or "info@domain.com" in lower_val:
+        return ""
+    return cleaned
+
 
 def process_bullet_text(text: str, show_added: bool, show_optimized: bool, revert_entire_string: bool = False) -> str:
     if not text:
@@ -175,14 +187,18 @@ def generate_styled_resume_html(data: Dict[str, Any], include_highlights: bool =
 
     personal = data.get("personalInfo", {})
     name = personal.get("name", "Applicant Name")
-    email = personal.get("email", "")
-    phone = personal.get("phone", "")
-    linkedin = personal.get("linkedin", "")
-    github = personal.get("github", "")
+    email = clean_contact_value(personal.get("email", ""))
+    phone = clean_contact_value(personal.get("phone", ""))
+    linkedin = clean_contact_value(personal.get("linkedin", ""))
+    github = clean_contact_value(personal.get("github", ""))
+    portfolio = clean_contact_value(personal.get("portfolio", ""))
 
-    contacts = [email, phone]
+    contacts = []
+    if email: contacts.append(email)
+    if phone: contacts.append(phone)
     if linkedin: contacts.append(linkedin)
     if github: contacts.append(github)
+    if portfolio: contacts.append(portfolio)
     contacts_str = " | ".join(contacts)
 
     summary = data.get("summary", "")
@@ -358,10 +374,17 @@ def generate_docx_from_data(data: dict) -> io.BytesIO:
     p_contact.paragraph_format.space_after = Pt(12)
     contact_parts = []
     personal = data.get("personalInfo", {})
-    if personal.get("email"): contact_parts.append(personal["email"])
-    if personal.get("phone"): contact_parts.append(personal["phone"])
-    if personal.get("linkedin"): contact_parts.append(personal["linkedin"])
-    if personal.get("github"): contact_parts.append(personal["github"])
+    email = clean_contact_value(personal.get("email", ""))
+    phone = clean_contact_value(personal.get("phone", ""))
+    linkedin = clean_contact_value(personal.get("linkedin", ""))
+    github = clean_contact_value(personal.get("github", ""))
+    portfolio = clean_contact_value(personal.get("portfolio", ""))
+
+    if email: contact_parts.append(email)
+    if phone: contact_parts.append(phone)
+    if linkedin: contact_parts.append(linkedin)
+    if github: contact_parts.append(github)
+    if portfolio: contact_parts.append(portfolio)
 
     run_contact = p_contact.add_run("  |  ".join(contact_parts))
     run_contact.font.size = Pt(9.5)
@@ -480,8 +503,19 @@ def generate_plain_text(data: dict, original_data: dict | None = None, show_adde
     """Generates formatted plain text version of the resume."""
     personal = data.get("personalInfo", {})
     name = personal.get("name", "Applicant Name").upper()
-    email = personal.get("email", "")
-    phone = personal.get("phone", "")
+    email = clean_contact_value(personal.get("email", ""))
+    phone = clean_contact_value(personal.get("phone", ""))
+    linkedin = clean_contact_value(personal.get("linkedin", ""))
+    github = clean_contact_value(personal.get("github", ""))
+    portfolio = clean_contact_value(personal.get("portfolio", ""))
+
+    contact_parts = []
+    if email: contact_parts.append(f"Email: {email}")
+    if phone: contact_parts.append(f"Phone: {phone}")
+    if linkedin: contact_parts.append(f"LinkedIn: {linkedin}")
+    if github: contact_parts.append(f"GitHub: {github}")
+    if portfolio: contact_parts.append(f"Portfolio: {portfolio}")
+    contacts_str = " | ".join(contact_parts)
 
     summary_text = original_data.get("summary", "") if (not show_optimized and original_data) else data.get("summary", "")
     clean_summary = clean_html_tags(process_bullet_text(str(summary_text or ""), show_added, show_optimized))

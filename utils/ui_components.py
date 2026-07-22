@@ -1,6 +1,19 @@
 import streamlit as st
 import streamlit.components.v1 as components
 from services.document_service import process_bullet_text, clean_html_tags
+import re
+
+def clean_contact_value(val: str) -> str:
+    if not val:
+        return ""
+    # Strip leading/trailing spaces, dashes, colons, vertical bars, bullets
+    cleaned = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', val)
+    cleaned = cleaned.strip()
+    # Hide default placeholders
+    lower_val = cleaned.lower()
+    if "linkedin.com/in/user" in lower_val or "github.com/user" in lower_val or "info@domain.com" in lower_val:
+        return ""
+    return cleaned
 
 def clean_markdown_html(html_str: str) -> str:
     """Removes leading whitespace from each line to prevent Streamlit from treating lines with >=4 spaces as code blocks."""
@@ -385,10 +398,10 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
 
     personal = data.get("personalInfo", {})
     name = personal.get("name", "Applicant Name")
-    email = personal.get("email", "")
-    phone = personal.get("phone", "")
-    linkedin = personal.get("linkedin", "")
-    github = personal.get("github", "")
+    email = clean_contact_value(personal.get("email", ""))
+    phone = clean_contact_value(personal.get("phone", ""))
+    linkedin = clean_contact_value(personal.get("linkedin", ""))
+    github = clean_contact_value(personal.get("github", ""))
 
     summary_text = original_data.get("summary", "") if (not show_optimized and original_data) else data.get("summary", "")
     summary_html = process_bullet_text(str(summary_text or ""), show_added, show_optimized)
