@@ -141,7 +141,7 @@ def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[
     for idx, exp in enumerate(data.get("experience") or []):
         bullets = list(exp.get("bullets") or [])
         if idx == 0 and len(bullets) > 0 and len(missing) > 2:
-            bullets[0] = f"{bullets[0]} <mark class="mod" data-tooltip="Optimized for keywords">Utilized <mark class="add" data-tooltip='Embedded keyword'>{missing[2]}</mark> to improve delivery efficiency.</mark>"
+            bullets[0] = f"{bullets[0]} <mark class='mod' data-tooltip='Optimized for keywords'>Utilized <mark class='add' data-tooltip='Embedded keyword'>{missing[2]}</mark> to improve delivery efficiency.</mark>"
         optimized["experience"].append({
             "role": exp.get("role") or "",
             "company": exp.get("company") or "",
@@ -153,13 +153,11 @@ def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[
     for idx, proj in enumerate(data.get("projects") or []):
         bullets = list(proj.get("bullets") or [])
         if idx == 0 and len(bullets) > 0 and len(missing) > 3:
-            bullets[0] = f"{bullets[0]} <mark class="mod" data-tooltip='Optimized for keywords'>Implemented utilizing <mark class="add" data-tooltip='Embedded keyword'>{missing[3]}</mark>.</mark>"
+            bullets[0] = f"{bullets[0]} <mark class='mod' data-tooltip='Optimized for keywords'>Implemented utilizing <mark class='add' data-tooltip='Embedded keyword'>{missing[3]}</mark>.</mark>"
         optimized["projects"].append({
             "name": proj.get("name") or "",
             "description": proj.get("description") or "",
             "bullets": bullets
         })
-
-    return optimized
 
     return optimized
