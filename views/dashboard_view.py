@@ -4,7 +4,7 @@ import json
 import streamlit as st
 from models.database import SessionLocal
 from models.db_models import Resume, JobDescription, ATSReport, OptimizedResume
-from services.parser_service import extract_text_from_pdf, extract_text_from_docx, parse_resume_text_via_llm, parse_resume_text_to_structure
+from services.parser_service import extract_text_from_pdf, extract_text_from_docx, parse_resume_text_via_llm, parse_resume_text_to_structure, extract_links_from_document
 from services.ats_service import calculate_ats_metrics, extract_keywords_from_text
 from services.optimizer_service import optimize_resume_data
 from services.storage_service import upload_file_to_supabase
@@ -79,6 +79,9 @@ def render_dashboard_view():
                             structured_json = json.loads(file_bytes.decode("utf-8"))
                         else:
                             file_stream = io.BytesIO(file_bytes)
+                            # Extract links cleanly from memory
+                            extracted_links = extract_links_from_document(file_stream, ext)
+
                             if ext == "pdf":
                                 parsed_text = extract_text_from_pdf(file_stream)
                             else:
@@ -87,6 +90,23 @@ def render_dashboard_view():
                             structured_json = parse_resume_text_via_llm(parsed_text)
                             if not structured_json:
                                 structured_json = parse_resume_text_to_structure(parsed_text, filename)
+
+                            # Cleanly inject extracted links into personalInfo
+                            if "personalInfo" not in structured_json:
+                                structured_json["personalInfo"] = {}
+                            p_info = structured_json["personalInfo"]
+                            
+                            for link in extracted_links:
+                                link_lower = link.lower()
+                                if "linkedin.com/in/" in link_lower and not p_info.get("linkedin"):
+                                    p_info["linkedin"] = link.strip()
+                                elif "github.com/" in link_lower and not p_info.get("github"):
+                                    p_info["github"] = link.strip()
+                                elif "mailto:" in link_lower and not p_info.get("email"):
+                                    p_info["email"] = link.replace("mailto:", "").strip()
+                                elif ("http" in link_lower or "www" in link_lower) and "linkedin" not in link_lower and "github" not in link_lower:
+                                    if not p_info.get("portfolio"):
+                                        p_info["portfolio"] = link.strip()
 
                         resume_url = upload_file_to_supabase(file_bytes, filename)
 
