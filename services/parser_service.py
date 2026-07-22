@@ -28,15 +28,18 @@ try:
 except ImportError:
     Anthropic = None
 
+import io
+from typing import Dict, Any, Optional, Union
+
 logger = logging.getLogger("ats-optimizer")
 
-def extract_text_from_pdf(file_path: str) -> str:
+def extract_text_from_pdf(file_or_path: Union[str, io.BytesIO]) -> str:
     """Extracts text from a PDF file using pdfplumber."""
     if not pdfplumber:
         raise Exception("pdfplumber library is not installed in the current Python environment.")
     text = ""
     try:
-        with pdfplumber.open(file_path) as pdf:
+        with pdfplumber.open(file_or_path) as pdf:
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
@@ -47,12 +50,12 @@ def extract_text_from_pdf(file_path: str) -> str:
     return text
 
 
-def extract_text_from_docx(file_path: str) -> str:
+def extract_text_from_docx(file_or_path: Union[str, io.BytesIO]) -> str:
     """Extracts text from a DOCX file using python-docx."""
     if not docx:
         raise Exception("python-docx library is not installed in the current Python environment.")
     try:
-        doc = docx.Document(file_path)
+        doc = docx.Document(file_or_path)
         text_runs = []
         for paragraph in doc.paragraphs:
             if paragraph.text:

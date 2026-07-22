@@ -1,5 +1,5 @@
 import os
-import tempfile
+import io
 import json
 import streamlit as st
 from models.database import SessionLocal
@@ -74,18 +74,15 @@ def render_dashboard_view():
                     filename = uploaded_file.name
                     ext = filename.split(".")[-1].lower()
 
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f".{ext}") as tmp:
-                        tmp.write(file_bytes)
-                        tmp_path = tmp.name
-
                     try:
                         if ext == "json":
                             structured_json = json.loads(file_bytes.decode("utf-8"))
                         else:
+                            file_stream = io.BytesIO(file_bytes)
                             if ext == "pdf":
-                                parsed_text = extract_text_from_pdf(tmp_path)
+                                parsed_text = extract_text_from_pdf(file_stream)
                             else:
-                                parsed_text = extract_text_from_docx(tmp_path)
+                                parsed_text = extract_text_from_docx(file_stream)
 
                             structured_json = parse_resume_text_via_llm(parsed_text)
                             if not structured_json:
@@ -110,9 +107,6 @@ def render_dashboard_view():
                         st.success(f"Successfully loaded {filename}")
                     except Exception as e:
                         st.error(f"Error parsing resume: {e}")
-                    finally:
-                        if os.path.exists(tmp_path):
-                            os.remove(tmp_path)
 
         if st.session_state.get("original_resume"):
             st.info(f"📄 Active Resume: **{st.session_state.get('resume_name', 'Loaded Resume')}**")
