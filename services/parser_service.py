@@ -79,7 +79,8 @@ Return the response ONLY in a valid JSON object matching this exact schema:
     "email": "Email Address",
     "phone": "Phone Number",
     "github": "Github URL (if present, else empty string)",
-    "linkedin": "LinkedIn URL (if present, else empty string)"
+    "linkedin": "LinkedIn URL (if present, else empty string)",
+    "portfolio": "Portfolio or personal website URL (if present, else empty string)"
   },
   "summary": "Professional Summary or Objective (if present, else empty string)",
   "skills": [
@@ -185,7 +186,8 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
             "email": "",
             "phone": "",
             "github": "",
-            "linkedin": ""
+            "linkedin": "",
+            "portfolio": ""
         },
         "summary": "",
         "skills": [],
@@ -214,6 +216,16 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
     github_match = re.search(r'(?:https?://)?(?:www\.)?github\.com/[a-zA-Z0-9_\-\/]+', text, re.IGNORECASE)
     if github_match:
         structure["personalInfo"]["github"] = github_match.group(0).strip()
+
+    # Extract Portfolio URL (any other valid URL that isn't github/linkedin)
+    urls = re.findall(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}(?:/[a-zA-Z0-9._%+-]*)*', text)
+    for url in urls:
+        lower_url = url.lower()
+        if "linkedin" not in lower_url and "github" not in lower_url and "email" not in lower_url:
+            # Simple validation to avoid matching file paths or extensions
+            if not any(lower_url.endswith(ext) for ext in [".pdf", ".docx", ".doc", ".png", ".jpg"]):
+                structure["personalInfo"]["portfolio"] = url.strip()
+                break
 
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     if lines:
