@@ -336,7 +336,7 @@ mark.mod {{
     color: #0f172a !important;
     border-color: #0f172a !important;
 }}
-.resume-paper span, .resume-paper p, .resume-paper li, .resume-paper strong {{
+.resume-paper span, .resume-paper p, .resume-paper li, .resume-paper strong, .resume-paper a {{
     color: inherit !important;
 }}
 </style>
@@ -471,9 +471,17 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
         cert_html_blocks.append(f"<li>{c_proc}</li>")
     cert_html = "\n".join(cert_html_blocks)
 
-    contacts = [f"Mobile: {phone}", f"Email: {email}"]
-    if linkedin: contacts.append(f"LinkedIn: {linkedin}")
-    if github: contacts.append(f"GitHub: {github}")
+    contacts = []
+    if phone:
+        contacts.append(f"Mobile: <a href='tel:{phone}' style='color: inherit !important; text-decoration: none;'>{phone}</a>")
+    if email:
+        contacts.append(f"Email: <a href='mailto:{email}' style='color: inherit !important; text-decoration: none;'>{email}</a>")
+    if linkedin:
+        li_url = linkedin if linkedin.startswith("http") else f"https://{linkedin}"
+        contacts.append(f"LinkedIn: <a href='{li_url}' target='_blank' style='color: inherit !important; text-decoration: none;'>{linkedin}</a>")
+    if github:
+        gh_url = github if github.startswith("http") else f"https://{github}"
+        contacts.append(f"GitHub: <a href='{gh_url}' target='_blank' style='color: inherit !important; text-decoration: none;'>{github}</a>")
     contacts_str = " | ".join(contacts)
 
     html = f"""
