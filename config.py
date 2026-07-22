@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Prevent Streamlit/Google GenAI from showing "GOOGLE_API_KEY is not configured" banner
+if not os.getenv("GOOGLE_API_KEY") and not os.getenv("GEMINI_API_KEY"):
+    os.environ["GOOGLE_API_KEY"] = "not-used"
+
 class Settings:
     PROJECT_NAME: str = "ResuMatch AI - Resume Optimizer"
     
