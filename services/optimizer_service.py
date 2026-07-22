@@ -137,27 +137,42 @@ def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[
         if not any(m.lower() in str(sk).lower() for sk in optimized["skills"]):
             optimized["skills"].append(f'<mark class="add" data-tooltip="Added missing skill found in Job Description">{m}</mark>')
 
-    # 3. Optimize experience: Inject missing keywords into first experience bullet without overwriting
-    for idx, exp in enumerate(data.get("experience") or []):
+    # 3. Optimize experience: Inject missing keywords sequentially into experience bullets
+    kw_idx = 0
+    for exp in data.get("experience") or []:
         bullets = list(exp.get("bullets") or [])
-        if idx == 0 and len(bullets) > 0 and len(missing) > 2:
-            bullets[0] = f"{bullets[0]} <mark class='mod' data-tooltip='Optimized for keywords'>Utilized <mark class='add' data-tooltip='Embedded keyword'>{missing[2]}</mark> to improve delivery efficiency.</mark>"
+        optimized_bullets = []
+        for bullet in bullets:
+            if kw_idx < len(missing):
+                kw = missing[kw_idx]
+                bullet_opt = f"{bullet} <mark class='mod' data-tooltip='Optimized for keywords'>Utilized <mark class='add' data-tooltip='Embedded keyword'>{kw}</mark> to improve delivery efficiency.</mark>"
+                optimized_bullets.append(bullet_opt)
+                kw_idx += 1
+            else:
+                optimized_bullets.append(bullet)
         optimized["experience"].append({
             "role": exp.get("role") or "",
             "company": exp.get("company") or "",
             "duration": exp.get("duration") or "",
-            "bullets": bullets
+            "bullets": optimized_bullets
         })
 
-    # 4. Optimize projects: Inject keywords into first project bullet
-    for idx, proj in enumerate(data.get("projects") or []):
+    # 4. Optimize projects: Inject missing keywords sequentially into project bullets
+    for proj in data.get("projects") or []:
         bullets = list(proj.get("bullets") or [])
-        if idx == 0 and len(bullets) > 0 and len(missing) > 3:
-            bullets[0] = f"{bullets[0]} <mark class='mod' data-tooltip='Optimized for keywords'>Implemented utilizing <mark class='add' data-tooltip='Embedded keyword'>{missing[3]}</mark>.</mark>"
+        optimized_bullets = []
+        for bullet in bullets:
+            if kw_idx < len(missing):
+                kw = missing[kw_idx]
+                bullet_opt = f"{bullet} <mark class='mod' data-tooltip='Optimized for keywords'>Implemented utilizing <mark class='add' data-tooltip='Embedded keyword'>{kw}</mark> methodologies.</mark>"
+                optimized_bullets.append(bullet_opt)
+                kw_idx += 1
+            else:
+                optimized_bullets.append(bullet)
         optimized["projects"].append({
             "name": proj.get("name") or "",
             "description": proj.get("description") or "",
-            "bullets": bullets
+            "bullets": optimized_bullets
         })
 
     return optimized
