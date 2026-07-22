@@ -27,22 +27,10 @@ Your task is to review a candidate's resume data and optimize it to align strict
 
 RULES:
 1. Inject missing keywords from the JD naturally into the "Summary", "Skills", and "Experience" sections.
-2. Re-word bullet points in the "Experience" and "Projects" sections using strong action verbs (e.g., Spearheaded, Developed, Optimized) and add realistic quantitative metrics (e.g., "improving performance by 25%", "cutting API latency by 40%") where appropriate.
-3. REMOVE / PRUNE skills and bullet items from the candidate's original resume that are irrelevant or not mentioned/required in the target Job Description to maximize ATS match density.
-4. CRITICAL: Do NOT alter the layout, formatting, names, contact info, companies, durations, degree titles, or graduation years.
-5. Do NOT hallucinate completely false jobs or credentials. Keep the core work history factual.
-6. Return the response ONLY in a valid JSON object matching the exact keys provided in the input resume. Include HTML `<mark class="add" data-tooltip="Embedded keyword">WORD</mark>` tags for any added keywords and `<mark class="mod" data-tooltip="Optimized for ATS metrics">SENTENCE</mark>` for modified sentences.
-
-Input JSON format:
-{
-  "personalInfo": { ... },
-  "summary": "...",
-  "skills": ["...", "..."],
-  "experience": [{"role": "...", "company": "...", "duration": "...", "bullets": ["...", "..."]}],
-  "projects": [{"name": "...", "description": "...", "bullets": ["...", "..."]}],
-  "education": [{"degree": "...", "school": "...", "year": "..."}],
-  "certifications": ["...", "..."]
-}
+2. CRITICAL: Do NOT remove, prune, or delete any skills, projects, certifications, work history, or bullet points from the candidate's original resume. Keep all original contents intact.
+3. CRITICAL: Do NOT alter the layout, formatting, names, contact info (phone, email, github, linkedin, portfolio), companies, durations, degree titles, or graduation years. Keep them EXACTLY the same as in the original resume.
+4. Do NOT rewrite paragraphs or bullets completely. Only modify existing sentences slightly to naturally embed the target missing keywords, or append new skills to the skills list.
+5. Return the response ONLY in a valid JSON object matching the exact keys and structure provided in the input resume. Include HTML `<mark class="add" data-tooltip="Embedded keyword">WORD</mark>` tags for any added keywords and `<mark class="mod" data-tooltip="Optimized for ATS metrics">SENTENCE</mark>` for modified sentences.
 """
 
 def optimize_resume_data(resume_structure: Dict[str, Any], jd_text: str, missing_keywords: List[str]) -> Dict[str, Any]:
@@ -126,65 +114,34 @@ def optimize_via_claude(data: Dict[str, Any], jd: str, missing: List[str]) -> Di
 
 
 def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[str]) -> Dict[str, Any]:
-    """Performs dynamic rule-based replacements and removes irrelevant skills to align with JD."""
+    """Performs dynamic rule-based replacements without removing original resume content."""
     optimized = {
         "personalInfo": data.get("personalInfo") or {},
         "summary": data.get("summary") or "",
-        "skills": [],
+        "skills": list(data.get("skills") or []),
         "experience": [],
         "projects": [],
         "education": data.get("education") or [],
         "certifications": list(data.get("certifications") or [])
     }
 
-    # 1. Optimize summary
+    # 1. Optimize summary (Inject first two missing keywords)
     sum_text = data.get("summary") or ""
     if missing:
         top_kws = missing[:2]
         kw_marks = " and ".join([f'<mark class="add" data-tooltip="Embedded target keyword">{k}</mark>' for k in top_kws])
-        optimized["summary"] = f"Results-driven professional expert in aligning operations with {kw_marks}. {sum_text}"
-    else:
-        optimized["summary"] = f"Results-driven specialist with a proven track record. {sum_text}"
+        optimized["summary"] = f"{sum_text} (Expertise aligns with {kw_marks}.)"
 
-    # 2. Filter original skills: prune skills that are completely unmentioned/unrelated in JD
-    jd_keywords = extract_keywords_from_text(jd_text) if jd_text else set()
-    orig_skills = list(data.get("skills") or [])
-
-    relevant_skills = []
-    for s in orig_skills:
-        s_clean = s.lower().strip()
-        # Keep if skill overlaps with JD keywords or appears in JD text
-        if not jd_text or any(k in s_clean or s_clean in k for k in jd_keywords) or any(w in jd_text.lower() for w in s_clean.split() if len(w) > 2):
-            relevant_skills.append(s)
-
-    # Fallback if filtering removed all skills
-    if not relevant_skills:
-        relevant_skills = orig_skills
-
-    optimized["skills"] = relevant_skills
-
-    # Append missing JD target skills
+    # 2. Append missing JD target skills without removing any existing ones
     for m in missing[:5]:
         if not any(m.lower() in str(sk).lower() for sk in optimized["skills"]):
             optimized["skills"].append(f'<mark class="add" data-tooltip="Added missing skill found in Job Description">{m}</mark>')
 
-    # 3. Optimize experience
+    # 3. Optimize experience: Inject missing keywords into first experience bullet without overwriting
     for idx, exp in enumerate(data.get("experience") or []):
         bullets = list(exp.get("bullets") or [])
-        if idx == 0 and len(bullets) > 0:
-            orig_bullet_0 = bullets[0]
-            kw_inject = ""
-            if len(missing) > 2:
-                kw_inject = f' utilizing <mark class="add" data-tooltip="Embedded keyword">{missing[2]}</mark>'
-            bullets[0] = f'<mark class="mod" data-tooltip="Rephrased with action verbs and metrics">{orig_bullet_0}{kw_inject}, improving deliverables and boosting efficiency by <mark class="add" data-tooltip="Added quantitative business result">24%</mark>.</mark>'
-
-            if len(bullets) > 1:
-                orig_bullet_1 = bullets[1]
-                kw_inject2 = ""
-                if len(missing) > 3:
-                    kw_inject2 = f' integrating <mark class="add" data-tooltip="Embedded keyword">{missing[3]}</mark>'
-                bullets[1] = f'<mark class="mod" data-tooltip="Optimized sentence structure for keywords">{orig_bullet_1}{kw_inject2}, increasing operational performance by <mark class="add" data-tooltip="Added measurable result">35%</mark>.</mark>'
-
+        if idx == 0 and len(bullets) > 0 and len(missing) > 2:
+            bullets[0] = f"{bullets[0]} <mark class="mod" data-tooltip="Optimized for keywords">Utilized <mark class="add" data-tooltip='Embedded keyword'>{missing[2]}</mark> to improve delivery efficiency.</mark>"
         optimized["experience"].append({
             "role": exp.get("role") or "",
             "company": exp.get("company") or "",
@@ -192,15 +149,17 @@ def local_rule_based_optimize(data: Dict[str, Any], jd_text: str, missing: List[
             "bullets": bullets
         })
 
-    # 4. Optimize projects
-    for proj in data.get("projects") or []:
+    # 4. Optimize projects: Inject keywords into first project bullet
+    for idx, proj in enumerate(data.get("projects") or []):
         bullets = list(proj.get("bullets") or [])
-        if len(bullets) > 0:
-            bullets[0] = f'{bullets[0]} <mark class="mod" data-tooltip="Optimized for JD keyword density">using modern industry-aligned frameworks.</mark>'
+        if idx == 0 and len(bullets) > 0 and len(missing) > 3:
+            bullets[0] = f"{bullets[0]} <mark class="mod" data-tooltip='Optimized for keywords'>Implemented utilizing <mark class="add" data-tooltip='Embedded keyword'>{missing[3]}</mark>.</mark>"
         optimized["projects"].append({
             "name": proj.get("name") or "",
             "description": proj.get("description") or "",
             "bullets": bullets
         })
+
+    return optimized
 
     return optimized

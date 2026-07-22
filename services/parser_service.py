@@ -38,15 +38,25 @@ def extract_text_from_pdf(file_or_path: Union[str, io.BytesIO]) -> str:
     if not pdfplumber:
         raise Exception("pdfplumber library is not installed in the current Python environment.")
     text = ""
+    links = []
     try:
         with pdfplumber.open(file_or_path) as pdf:
             for page in pdf.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
+                # Extract embedded hyperlinks
+                if hasattr(page, "hyperlinks") and page.hyperlinks:
+                    for hl in page.hyperlinks:
+                        uri = hl.get("uri")
+                        if uri:
+                            links.append(uri)
     except Exception as e:
         logger.error(f"pdfplumber extraction failed: {e}")
         raise Exception("Failed to extract text from PDF file.")
+
+    if links:
+        text += "\n\n--- Extracted Links ---\n" + "\n".join(links) + "\n"
     return text
 
 
@@ -65,7 +75,18 @@ def extract_text_from_docx(file_or_path: Union[str, io.BytesIO]) -> str:
                 for cell in row.cells:
                     if cell.text:
                         text_runs.append(cell.text)
-        return "\n".join(text_runs)
+        
+        # Extract embedded hyperlinks from relationships
+        links = []
+        if hasattr(doc, "part") and hasattr(doc.part, "rels"):
+            for rel in doc.part.rels.values():
+                if hasattr(rel, "reltype") and "hyperlink" in rel.reltype and hasattr(rel, "target_ref"):
+                    links.append(rel.target_ref)
+        
+        raw_text = "\n".join(text_runs)
+        if links:
+            raw_text += "\n\n--- Extracted Links ---\n" + "\n".join(links) + "\n"
+        return raw_text
     except Exception as e:
         logger.error(f"python-docx extraction failed: {e}")
         raise Exception("Failed to extract text from DOCX file.")
