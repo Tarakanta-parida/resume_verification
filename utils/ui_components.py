@@ -499,13 +499,13 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
         {skills_html}
     </div>
 
-    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Work Experience</h3>{{exp_html}}' if exp_html.strip() else ''}}
+    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Work Experience</h3>{exp_html}' if exp_html.strip() else ''}
     
-    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Technical Projects</h3>{{proj_html}}' if proj_html.strip() else ''}}
+    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Technical Projects</h3>{proj_html}' if proj_html.strip() else ''}
 
-    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Education</h3>{{edu_html}}' if edu_html.strip() else ''}}
+    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Education</h3>{edu_html}' if edu_html.strip() else ''}
 
-    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Certifications</h3><ul style="padding-left: 18px; margin: 0; color: #334155 !important;">{{cert_html}}</ul>' if cert_html.strip() else ''}}
+    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Certifications</h3><ul style="padding-left: 18px; margin: 0; color: #334155 !important;">{cert_html}</ul>' if cert_html.strip() else ''}
 </div>
 """
     st.markdown(clean_markdown_html(html), unsafe_allow_html=True)
