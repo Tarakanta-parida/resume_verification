@@ -14,14 +14,7 @@ def clean_html_tags(text: str) -> str:
 def clean_contact_value(val: str) -> str:
     if not val:
         return ""
-    # Strip leading/trailing spaces, dashes, colons, vertical bars, bullets
-    cleaned = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', val)
-    cleaned = cleaned.strip()
-    # Hide default placeholders
-    lower_val = cleaned.lower()
-    if "linkedin.com/in/user" in lower_val or "github.com/user" in lower_val or "info@domain.com" in lower_val:
-        return ""
-    return cleaned
+    return val.strip()
 
 
 def process_bullet_text(text: str, show_added: bool, show_optimized: bool, revert_entire_string: bool = False) -> str:

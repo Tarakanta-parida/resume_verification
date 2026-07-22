@@ -6,14 +6,7 @@ import re
 def clean_contact_value(val: str) -> str:
     if not val:
         return ""
-    # Strip leading/trailing spaces, dashes, colons, vertical bars, bullets
-    cleaned = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', val)
-    cleaned = cleaned.strip()
-    # Hide default placeholders
-    lower_val = cleaned.lower()
-    if "linkedin.com/in/user" in lower_val or "github.com/user" in lower_val or "info@domain.com" in lower_val:
-        return ""
-    return cleaned
+    return val.strip()
 
 def clean_markdown_html(html_str: str) -> str:
     """Removes leading whitespace from each line to prevent Streamlit from treating lines with >=4 spaces as code blocks."""
@@ -485,20 +478,24 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
     cert_html = "\n".join(cert_html_blocks)
 
     portfolio = personal.get("portfolio", "")
-
     contacts = []
     if phone:
-        contacts.append(f"Mobile: <a href='tel:{phone}' style='color: inherit !important; text-decoration: none;'>{phone}</a>")
+        phone_href = re.sub(r'[^0-9+]', '', phone)
+        contacts.append(f"Mobile: <a href='tel:{phone_href}' style='color: inherit !important; text-decoration: none;'>{phone}</a>")
     if email:
-        contacts.append(f"Email: <a href='mailto:{email}' style='color: #0284c7 !important; text-decoration: underline;'>{email}</a>")
+        email_href = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', email).strip()
+        contacts.append(f"Email: <a href='mailto:{email_href}' style='color: #0284c7 !important; text-decoration: underline;'>{email}</a>")
     if linkedin:
-        li_url = linkedin if linkedin.startswith("http") else f"https://{linkedin}"
+        li_href = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', linkedin).strip()
+        li_url = li_href if li_href.startswith("http") else f"https://{li_href}"
         contacts.append(f"<a href='{li_url}' target='_blank' style='color: #0284c7 !important; text-decoration: underline;'>LinkedIn</a>")
     if github:
-        gh_url = github if github.startswith("http") else f"https://{github}"
+        gh_href = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', github).strip()
+        gh_url = gh_href if gh_href.startswith("http") else f"https://{gh_href}"
         contacts.append(f"<a href='{gh_url}' target='_blank' style='color: #0284c7 !important; text-decoration: underline;'>GitHub</a>")
     if portfolio:
-        port_url = portfolio if portfolio.startswith("http") else f"https://{portfolio}"
+        port_href = re.sub(r'^[\s\-:|•·▪◦-]+|[\s\-:|•·▪◦-]+$', '', portfolio).strip()
+        port_url = port_href if port_href.startswith("http") else f"https://{port_href}"
         contacts.append(f"<a href='{port_url}' target='_blank' style='color: #0284c7 !important; text-decoration: underline;'>Portfolio</a>")
     contacts_str = " | ".join(contacts)
 
