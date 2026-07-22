@@ -208,12 +208,12 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
             structure["personalInfo"]["phone"] = valid_phones[0]
 
     # Extract LinkedIn URL
-    linkedin_match = re.search(r'(?:https?://)?(?:www\.)?linkedin\.com/in/[a-zA-Z0-9_\-\/]+', text, re.IGNORECASE)
+    linkedin_match = re.search(r'(?:https?://)?(?:www\.)?linkedin\.com/in/[a-zA-Z0-9_\-\/\.]+', text, re.IGNORECASE)
     if linkedin_match:
         structure["personalInfo"]["linkedin"] = linkedin_match.group(0).strip()
 
     # Extract GitHub URL
-    github_match = re.search(r'(?:https?://)?(?:www\.)?github\.com/[a-zA-Z0-9_\-\/]+', text, re.IGNORECASE)
+    github_match = re.search(r'(?:https?://)?(?:www\.)?github\.com/[a-zA-Z0-9_\-\/\.]+', text, re.IGNORECASE)
     if github_match:
         structure["personalInfo"]["github"] = github_match.group(0).strip()
 
