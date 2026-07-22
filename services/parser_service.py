@@ -182,10 +182,10 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
     structure: Dict[str, Any] = {
         "personalInfo": {
             "name": filename.replace("_", " ").split(".")[0],
-            "email": "info@domain.com",
-            "phone": "+1 (555) 000-0000",
-            "github": "github.com/user",
-            "linkedin": "linkedin.com/in/user"
+            "email": "",
+            "phone": "",
+            "github": "",
+            "linkedin": ""
         },
         "summary": "",
         "skills": [],
@@ -204,6 +204,16 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
         valid_phones = [p.strip() for p in phones if len(re.sub(r'[^0-9]', '', p)) >= 10]
         if valid_phones:
             structure["personalInfo"]["phone"] = valid_phones[0]
+
+    # Extract LinkedIn URL
+    linkedin_match = re.search(r'(?:https?://)?(?:www\.)?linkedin\.com/in/[a-zA-Z0-9_\-\/]+', text, re.IGNORECASE)
+    if linkedin_match:
+        structure["personalInfo"]["linkedin"] = linkedin_match.group(0).strip()
+
+    # Extract GitHub URL
+    github_match = re.search(r'(?:https?://)?(?:www\.)?github\.com/[a-zA-Z0-9_\-\/]+', text, re.IGNORECASE)
+    if github_match:
+        structure["personalInfo"]["github"] = github_match.group(0).strip()
 
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     if lines:
