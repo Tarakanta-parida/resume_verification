@@ -6,7 +6,7 @@ It extracts keywords from target job descriptions, calculates ATS match metrics,
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 - **Multi-Format Document Upload**: Supports PDF (`.pdf`), Word (`.docx`), and structured JSON (`.json`) resume files.
 - **Pre-Loaded Sample Candidates**: Includes ready-to-test candidate profiles (Software Engineer, Data Analyst, Product Manager, Marketing Specialist).

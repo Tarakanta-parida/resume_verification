@@ -198,11 +198,11 @@ div[data-baseweb="checkbox"] svg {{
     stroke: #ffffff !important;
 }}
 
-p, span, label, h1, h2, h3, h4, h5, h6 {{
+p:not(.resume-paper *), span:not(.resume-paper *), label:not(.resume-paper *), h1:not(.resume-paper *), h2:not(.resume-paper *), h3:not(.resume-paper *), h4:not(.resume-paper *), h5:not(.resume-paper *), h6:not(.resume-paper *) {{
     color: {text_color};
 }}
 
-.stMarkdown p {{
+.stMarkdown p:not(.resume-paper *) {{
     color: {text_color};
 }}
 
@@ -330,6 +330,15 @@ mark.mod {{
     line-height: 1.6;
     min-height: 650px;
 }}
+
+/* Force Resume Paper text to be visible (override global dark mode text colors) */
+.resume-paper h1, .resume-paper h2, .resume-paper h3, .resume-paper h4, .resume-paper h5, .resume-paper h6 {{
+    color: #0f172a !important;
+    border-color: #0f172a !important;
+}}
+.resume-paper span, .resume-paper p, .resume-paper li, .resume-paper strong {{
+    color: inherit !important;
+}}
 </style>
 """
     st.markdown(clean_markdown_html(css), unsafe_allow_html=True)
@@ -406,14 +415,14 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
 
         exp_html_blocks.append(f"""
 <div style="margin-bottom: 12px;">
-    <div style="display: flex; justify-content: space-between; font-weight: 700; color: #0f172a;">
+    <div style="display: flex; justify-content: space-between; font-weight: 700; color: #0f172a !important;">
         <span>{role}</span>
         <span>{duration}</span>
     </div>
-    <div style="font-style: italic; color: #64748b; font-size: 11px; margin-bottom: 4px;">
+    <div style="font-style: italic; color: #64748b !important; font-size: 11px; margin-bottom: 4px;">
         {company}
     </div>
-    <ul style="padding-left: 18px; margin: 0; color: #334155;">
+    <ul style="padding-left: 18px; margin: 0; color: #334155 !important;">
         {bullets_html}
     </ul>
 </div>
@@ -434,10 +443,10 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
 
         proj_html_blocks.append(f"""
 <div style="margin-bottom: 12px;">
-    <div style="font-weight: 700; color: #0f172a;">
-        <span>{p_name}</span> {f'| <span style="font-weight: 400; font-style: italic; color: #64748b;">{p_desc}</span>' if p_desc else ''}
+    <div style="font-weight: 700; color: #0f172a !important;">
+        <span>{p_name}</span> {f'| <span style="font-weight: 400; font-style: italic; color: #64748b !important;">{p_desc}</span>' if p_desc else ''}
     </div>
-    <ul style="padding-left: 18px; margin: 4px 0 0 0; color: #334155;">
+    <ul style="padding-left: 18px; margin: 4px 0 0 0; color: #334155 !important;">
         {bullets_html}
     </ul>
 </div>
@@ -448,8 +457,8 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
     for edu in data.get("education", []):
         edu_html_blocks.append(f"""
 <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-    <div><strong style="color: #0f172a;">{edu.get('degree', '')}</strong> — <span style="color: #64748b;">{edu.get('school', '')}</span></div>
-    <div style="font-weight: 600; color: #0f172a;">{edu.get('year', '')}</div>
+    <div><strong style="color: #0f172a !important;">{edu.get('degree', '')}</strong> — <span style="color: #64748b !important;">{edu.get('school', '')}</span></div>
+    <div style="font-weight: 600; color: #0f172a !important;">{edu.get('year', '')}</div>
 </div>
 """)
     edu_html = "\n".join(edu_html_blocks)
@@ -469,34 +478,34 @@ def render_resume_paper_view(data: dict, original_data: dict | None = None, show
 
     html = f"""
 <div class="resume-paper">
-    <h2 style="text-align: center; font-size: 22px; font-weight: 800; margin: 0 0 4px 0; color: #0f172a;">
+    <h2 style="text-align: center; font-size: 22px; font-weight: 800; margin: 0 0 4px 0; color: #0f172a !important;">
         {name}
     </h2>
-    <div style="text-align: center; font-size: 10px; font-weight: 600; color: #475569; margin-bottom: 16px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px;">
+    <div style="text-align: center; font-size: 10px; font-weight: 600; color: #475569 !important; margin-bottom: 16px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px;">
         {contacts_str}
     </div>
     
-    <h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">
+    <h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">
         Career Objective
     </h3>
-    <p style="margin: 0 0 12px 0; text-align: justify; color: #334155;">
+    <p style="margin: 0 0 12px 0; text-align: justify; color: #334155 !important;">
         {summary_html}
     </p>
 
-    <h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">
+    <h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">
         Technical Skills
     </h3>
-    <div style="margin-bottom: 12px; color: #334155;">
+    <div style="margin-bottom: 12px; color: #334155 !important;">
         {skills_html}
     </div>
 
-    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">Work Experience</h3>{exp_html}' if exp_html.strip() else ''}
+    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Work Experience</h3>{{exp_html}}' if exp_html.strip() else ''}}
     
-    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">Technical Projects</h3>{proj_html}' if proj_html.strip() else ''}
+    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Technical Projects</h3>{{proj_html}}' if proj_html.strip() else ''}}
 
-    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">Education</h3>{edu_html}' if edu_html.strip() else ''}
+    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Education</h3>{{edu_html}}' if edu_html.strip() else ''}}
 
-    {f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a; border-bottom: 1.5px solid #0f172a; padding-bottom: 2px; margin: 14px 0 6px 0;">Certifications</h3><ul style="padding-left: 18px; margin: 0; color: #334155;">{cert_html}</ul>' if cert_html.strip() else ''}
+    {{f'<h3 style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #0f172a !important; border-bottom: 1.5px solid #0f172a !important; padding-bottom: 2px; margin: 14px 0 6px 0;">Certifications</h3><ul style="padding-left: 18px; margin: 0; color: #334155 !important;">{{cert_html}}</ul>' if cert_html.strip() else ''}}
 </div>
 """
     st.markdown(clean_markdown_html(html), unsafe_allow_html=True)

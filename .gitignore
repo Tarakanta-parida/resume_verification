@@ -1,23 +1,29 @@
-# Python virtual environment
-backend/.venv/
-backend/__pycache__/
-backend/**/*.pyc
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
 
 # Node modules and build files
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
+node_modules/
+.next/
+out/
+build/
 
 # Local databases
-local_ats.db
+*.db
+*.sqlite
 
 # Environment variables and secrets
 .env
 .env.local
 .env.*.local
-backend/.env
-frontend/.env.local
 
 # Temporary files
 temp/
