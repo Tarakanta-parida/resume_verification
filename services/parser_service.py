@@ -367,13 +367,19 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
             continue
 
         # --- Parse content based on current section ---
+        BULLET_CHARS = ["•", "●", "▪", "■", "○", "⁃", "–", "—", "*", "-", "✓", "✔"]
+        BULLET_PATTERN = r'^[' + ''.join(re.escape(c) for c in BULLET_CHARS) + r'\s]+'
+        
+        # Check if line starts with a bullet character
+        starts_with_bullet = any(line.startswith(c) for c in BULLET_CHARS)
+
         if current_section == "summary":
             structure["summary"] += (" " if structure["summary"] else "") + line
 
         elif current_section == "skills":
-            # Split by common skill delimiters
-            skills = [s.strip() for s in re.split(r'[,|•\t]', line) if s.strip()]
-            structure["skills"].extend(skills)
+            # Split by common skill delimiters and strip any prepended bullets
+            skills = [re.sub(BULLET_PATTERN, '', s).strip() for s in re.split(r'[,|•●\t]', line) if s.strip()]
+            structure["skills"].extend([s for s in skills if s])
 
         elif current_section == "experience":
             # Check if line contains a year range (likely a new role header)
@@ -382,12 +388,12 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
                 duration_match = re.search(r'((19|20)\d{2}\s*(-\s*(present|(19|20)\d{2}))?)', line, re.IGNORECASE)
                 temp_duration = duration_match.group(0) if duration_match else ""
                 cleaned_line = line.replace(temp_duration, "").strip() if temp_duration else line
-                cleaned_line = re.sub(r'^[\-–—|•*\s]+|[\-–—|•*\s]+$', '', cleaned_line).strip()
-                headers = [h.strip() for h in re.split(r'[,|•\t]', cleaned_line) if h.strip()]
+                cleaned_line = re.sub(r'^[\-–—|•●*\s]+|[\-–—|•●*\s]+$', '', cleaned_line).strip()
+                headers = [h.strip() for h in re.split(r'[,|•●\t]', cleaned_line) if h.strip()]
                 temp_role = headers[0] if len(headers) > 0 else ""
                 temp_company = headers[1] if len(headers) > 1 else ""
-            elif line.startswith("•") or line.startswith("-") or line.startswith("*") or line.startswith("–"):
-                temp_bullets.append(re.sub(r'^[•\-\*–\s]+', '', line))
+            elif starts_with_bullet:
+                temp_bullets.append(re.sub(BULLET_PATTERN, '', line))
             else:
                 # Continuation of a bullet or a standalone responsibility line
                 if temp_bullets:
@@ -396,8 +402,8 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
                     temp_bullets.append(line)
 
         elif current_section == "projects":
-            if line.startswith("•") or line.startswith("-") or line.startswith("*") or line.startswith("–"):
-                bullet_text = re.sub(r'^[•\-\*–\s]+', '', line)
+            if starts_with_bullet:
+                bullet_text = re.sub(BULLET_PATTERN, '', line)
                 if structure["projects"]:
                     structure["projects"][-1]["bullets"].append(bullet_text)
                 else:
@@ -463,14 +469,34 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
             if score_val:
                 # Remove score portion from display line
                 cleaned_line = re.sub(re.escape(score_match.group(0) if score_match else (pct_match.group(0) if pct_match else "")), '', cleaned_line).strip() if (score_match or pct_match) else cleaned_line
-            cleaned_line = re.sub(r'^[\-–—|•*\s,]+|[\-–—|•*\s,]+$', '', cleaned_line).strip()
+            cleaned_line = re.sub(r'^[\-–—|•●*\s,]+|[\-–—|•●*\s,]+$', '', cleaned_line).strip()
 
             if is_new_edu and cleaned_line:
-                # Build school from any institution-like text following the degree
-                # Try to split by common delimiters to separate degree from school
-                parts = [p.strip() for p in re.split(r'[,\t|–—]', cleaned_line) if p.strip()]
-                degree_text = parts[0] if parts else cleaned_line
-                school_text = " — ".join(parts[1:]) if len(parts) > 1 else ""
+                # Split degree vs school using school keywords
+                school_keywords = ["university", "college", "school", "institute", "bse", "cbse", "icse"]
+                school_idx = -1
+                lower_clean = cleaned_line.lower()
+                for skw in school_keywords:
+                    pos = lower_clean.find(skw)
+                    if pos != -1 and (school_idx == -1 or pos < school_idx):
+                        school_idx = pos
+                
+                if school_idx != -1:
+                    # Capture the word before the school keyword if capitalized
+                    pre_words = cleaned_line[:school_idx].strip().split()
+                    exclude_prev = ["pass", "class", "degree", "diploma", "bachelor", "master", "doctor", "-"]
+                    if pre_words and pre_words[-1][0].isupper() and pre_words[-1].lower() not in exclude_prev:
+                        school_part = pre_words[-1]
+                        degree_text = " ".join(pre_words[:-1]).strip()
+                        school_text = school_part + " " + cleaned_line[school_idx:].strip()
+                    else:
+                        degree_text = cleaned_line[:school_idx].strip()
+                        school_text = cleaned_line[school_idx:].strip()
+                else:
+                    parts = [p.strip() for p in re.split(r'[,\t|–—]', cleaned_line) if p.strip()]
+                    degree_text = parts[0] if parts else cleaned_line
+                    school_text = " — ".join(parts[1:]) if len(parts) > 1 else ""
+
                 year_display = year_val
                 if score_val:
                     year_display = f"{year_val}  |  {score_val}" if year_val else score_val
@@ -500,9 +526,10 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
                     })
 
         elif current_section == "certifications":
-            cert_val = re.sub(r'^[•\-\*–\s]+', '', line)
+            cert_val = re.sub(BULLET_PATTERN, '', line)
             if cert_val:
                 structure["certifications"].append(cert_val)
+
 
     # Save any remaining experience
     save_experience()
