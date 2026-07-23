@@ -72,9 +72,7 @@ section[data-testid="stSidebar"] {{
 
 /* Form Controls & Inputs */
 .stTextArea textarea, .stTextInput input, 
-div[data-testid="stSelectbox"] > div,
-div[data-baseweb="select"],
-div[data-baseweb="select"] > div {{
+div[data-baseweb="select"] {{
     background-color: {input_bg} !important;
     color: {text_color} !important;
     border: 1px solid {input_border} !important;
