@@ -266,7 +266,6 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
     for url in urls:
         lower_url = url.lower()
         if "linkedin" not in lower_url and "github" not in lower_url and "email" not in lower_url:
-            # Simple validation to avoid matching file paths or extensions
             if not any(lower_url.endswith(ext) for ext in [".pdf", ".docx", ".doc", ".png", ".jpg"]):
                 structure["personalInfo"]["portfolio"] = url.strip()
                 break
@@ -275,8 +274,60 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
     if lines:
         structure["personalInfo"]["name"] = lines[0]
 
+    # --- Section detection keywords ---
+    SUMMARY_KEYS = ["summary", "profile", "objective", "professional summary", "career objective", "about me", "career summary"]
+    SKILLS_KEYS = ["skills", "competencies", "technologies", "key skills", "core competencies", "expertise", "skills & tools", "technical skills", "skills and tools"]
+    EXPERIENCE_KEYS = ["experience", "employment", "work history", "professional experience", "employment history", "career history", "work experience", "key responsibilities", "responsibilities", "internship", "internships"]
+    PROJECTS_KEYS = ["projects", "accomplishments", "key projects", "technical projects", "academic projects", "personal projects"]
+    EDUCATION_KEYS = ["education", "academic", "qualifications", "academic background", "credentials", "academic qualifications", "educational qualifications"]
+    CERTIFICATIONS_KEYS = ["certifications", "licenses", "courses", "certification", "training", "trainings"]
+    # Sections to skip entirely (content not added to any field)
+    SKIP_KEYS = ["hobbies", "interests", "hobbies and interests", "personal profile", "personal details", "personal information", "declaration", "references", "extra curricular", "extracurricular", "co-curricular"]
+
+    def detect_section(line_text: str) -> str:
+        """Detects which section a header line belongs to. Returns section key or empty string."""
+        # Strip common punctuation from headers
+        cleaned = re.sub(r'[:\-–—|•*#_]+$', '', line_text).strip()
+        lower = cleaned.lower()
+
+        # Check each section type
+        for key in SKIP_KEYS:
+            if key in lower:
+                return "skip"
+        for key in SUMMARY_KEYS:
+            if key in lower:
+                return "summary"
+        for key in SKILLS_KEYS:
+            if key in lower:
+                return "skills"
+        for key in EXPERIENCE_KEYS:
+            if key in lower:
+                return "experience"
+        for key in PROJECTS_KEYS:
+            if key in lower:
+                return "projects"
+        for key in EDUCATION_KEYS:
+            if key in lower:
+                return "education"
+        for key in CERTIFICATIONS_KEYS:
+            if key in lower:
+                return "certifications"
+        return ""
+
+    def is_section_header(line_text: str) -> bool:
+        """Checks if a line looks like a section header."""
+        stripped = line_text.strip()
+        # All-caps or title-case short lines
+        if len(stripped) < 60 and (stripped.isupper() or stripped.istitle() or stripped.endswith(":")):
+            return True
+        # Lines that are bold-style markers (all caps with possible colon/dash)
+        cleaned = re.sub(r'[:\-–—|•*#_\s]+$', '', stripped)
+        if len(cleaned) < 50 and cleaned.replace(" ", "").isalpha() and cleaned.isupper():
+            return True
+        return False
+
     current_section = ""
-    temp_bullets = []
+    temp_bullets: list = []
     temp_company = ""
     temp_role = ""
     temp_duration = ""
@@ -286,121 +337,177 @@ def parse_resume_text_to_structure(text: str, filename: str) -> Dict[str, Any]:
         if temp_role or temp_company or temp_bullets:
             structure["experience"].append({
                 "role": temp_role or "Specialist",
-                "company": temp_company or "Company Inc",
-                "duration": temp_duration or "Present",
-                "bullets": temp_bullets if temp_bullets else ["Assisted in daily team deliverables."]
+                "company": temp_company or "",
+                "duration": temp_duration or "",
+                "bullets": temp_bullets if temp_bullets else []
             })
+            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
 
     for line in lines[1:]:
         lower_line = line.lower()
-        is_header = len(line) < 40
 
-        if is_header and any(x in lower_line for x in ["summary", "profile", "objective", "professional summary", "career objective"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "summary"
-            continue
-        elif is_header and any(x in lower_line for x in ["skills", "competencies", "technologies", "key skills", "core competencies", "expertise", "skills & tools", "technical skills"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "skills"
-            continue
-        elif is_header and any(x in lower_line for x in ["experience", "employment", "work history", "professional experience", "employment history", "career history", "work experience"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "experience"
-            continue
-        elif is_header and any(x in lower_line for x in ["projects", "accomplishments", "key projects", "technical projects", "academic projects"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "projects"
-            continue
-        elif is_header and any(x in lower_line for x in ["education", "academic", "qualifications", "academic background", "credentials"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "education"
-            continue
-        elif is_header and any(x in lower_line for x in ["certifications", "licenses", "courses", "credentials"]):
-            save_experience()
-            temp_role, temp_company, temp_duration, temp_bullets = "", "", "", []
-            current_section = "certifications"
+        # --- Detect section header ---
+        detected = detect_section(line)
+        if detected and is_section_header(line):
+            # Save any pending experience before switching
+            if current_section == "experience":
+                save_experience()
+            current_section = detected
             continue
 
+        # Also detect headers that aren't perfectly formatted but match keywords
+        if detected and len(line) < 60:
+            if current_section == "experience":
+                save_experience()
+            current_section = detected
+            continue
+
+        # --- Skip section: don't store content ---
+        if current_section == "skip":
+            continue
+
+        # --- Parse content based on current section ---
         if current_section == "summary":
             structure["summary"] += (" " if structure["summary"] else "") + line
+
         elif current_section == "skills":
+            # Split by common skill delimiters
             skills = [s.strip() for s in re.split(r'[,|•\t]', line) if s.strip()]
             structure["skills"].extend(skills)
+
         elif current_section == "experience":
+            # Check if line contains a year range (likely a new role header)
             if re.search(r'(19|20)\d{2}', line) or "present" in lower_line:
                 save_experience()
-                temp_bullets = []
-                duration_match = re.search(r'((19|20)\d{2}\s*-\s*(present|(19|20)\d{2}))', line, re.IGNORECASE)
-                temp_duration = duration_match.group(0) if duration_match else "Present"
-                cleaned_line = line.replace(temp_duration, "").strip()
-                headers = [h.strip() for h in re.split(r'[,|•\t-]', cleaned_line) if h.strip()]
-                temp_role = headers[0] if len(headers) > 0 else "Engineer"
-                temp_company = headers[1] if len(headers) > 1 else "Corporation"
-            elif line.startswith("•") or line.startswith("-") or line.startswith("*"):
-                temp_bullets.append(re.sub(r'^[•\-\*\s]+', '', line))
+                duration_match = re.search(r'((19|20)\d{2}\s*(-\s*(present|(19|20)\d{2}))?)', line, re.IGNORECASE)
+                temp_duration = duration_match.group(0) if duration_match else ""
+                cleaned_line = line.replace(temp_duration, "").strip() if temp_duration else line
+                cleaned_line = re.sub(r'^[\-–—|•*\s]+|[\-–—|•*\s]+$', '', cleaned_line).strip()
+                headers = [h.strip() for h in re.split(r'[,|•\t]', cleaned_line) if h.strip()]
+                temp_role = headers[0] if len(headers) > 0 else ""
+                temp_company = headers[1] if len(headers) > 1 else ""
+            elif line.startswith("•") or line.startswith("-") or line.startswith("*") or line.startswith("–"):
+                temp_bullets.append(re.sub(r'^[•\-\*–\s]+', '', line))
             else:
+                # Continuation of a bullet or a standalone responsibility line
                 if temp_bullets:
                     temp_bullets[-1] += " " + line
                 else:
                     temp_bullets.append(line)
+
         elif current_section == "projects":
-            if line.startswith("•") or line.startswith("-") or line.startswith("*"):
+            if line.startswith("•") or line.startswith("-") or line.startswith("*") or line.startswith("–"):
+                bullet_text = re.sub(r'^[•\-\*–\s]+', '', line)
                 if structure["projects"]:
-                    structure["projects"][-1]["bullets"].append(re.sub(r'^[•\-\*\s]+', '', line))
-            else:
-                is_new_project = ("|" in line) or (not structure["projects"]) or (structure["projects"] and not structure["projects"][-1]["bullets"])
-                if is_new_project:
-                    headers = [h.strip() for h in re.split(r'[,|•\t-]', line) if h.strip()]
+                    structure["projects"][-1]["bullets"].append(bullet_text)
+                else:
+                    # No project header yet, create one
                     structure["projects"].append({
-                        "name": headers[0] if len(headers) > 0 else "Personal Project",
-                        "description": headers[1] if len(headers) > 1 else "Project Description",
+                        "name": "Project",
+                        "description": "",
+                        "bullets": [bullet_text]
+                    })
+            else:
+                # Check if this is a new project name (contains | or is a short non-bullet line)
+                is_new_project = ("|" in line) or (not structure["projects"]) or (
+                    structure["projects"] and not structure["projects"][-1]["bullets"]
+                )
+                if is_new_project:
+                    parts = [h.strip() for h in re.split(r'[|]', line) if h.strip()]
+                    structure["projects"].append({
+                        "name": parts[0] if len(parts) > 0 else "Project",
+                        "description": parts[1] if len(parts) > 1 else "",
                         "bullets": []
                     })
                 else:
                     if structure["projects"] and structure["projects"][-1]["bullets"]:
                         structure["projects"][-1]["bullets"][-1] += " " + line
+
         elif current_section == "education":
-            edu_keywords = ["b.tech", "b.e.", "m.tech", "b.s.", "m.s.", "bachelor", "master", "ph.d", "degree", "12th", "10th", "hsc", "ssc", "diploma", "science", "commerce", "arts", "high school", "school", "intermediate", "matriculation"]
+            # --- Handle tabular education data ---
+            # Detect table header rows and skip them
+            table_header_keys = ["examination", "board/university", "school/college", "year", "score", "grade", "cgpa", "percentage"]
+            if sum(1 for k in table_header_keys if k in lower_line) >= 2:
+                continue  # Skip table header row
+
+            # Try to detect structured education entry with year
+            edu_keywords = [
+                "b.tech", "b.e.", "m.tech", "b.s.", "m.s.", "b.sc", "m.sc",
+                "bachelor", "master", "ph.d", "degree", "diploma",
+                "12th", "10th", "hsc", "ssc", "cssc", "iti",
+                "high school", "school", "intermediate", "matriculation",
+                "pass", "science", "commerce", "arts", "engineering"
+            ]
             is_new_edu = any(k in lower_line for k in edu_keywords)
             year_match = re.search(r'\b((19|20)\d{2}\s*(-\s*(present|(19|20)\d{2}))?)\b', line, re.IGNORECASE)
             year_val = year_match.group(0) if year_match else ""
+
+            # Try to extract score/grade/percentage/CGPA
+            score_match = re.search(r'(?:CGPA|GPA|Percentage|Score|Grade)\s*[:\-]?\s*([\d.]+%?)', line, re.IGNORECASE)
+            score_val = ""
+            if score_match:
+                score_val = score_match.group(0).strip()
+            else:
+                # Look for standalone percentage or CGPA pattern
+                pct_match = re.search(r'\b(\d{1,3}(?:\.\d+)?)\s*%', line)
+                cgpa_match = re.search(r'\b(\d\.\d{1,2})\b', line)
+                if pct_match:
+                    score_val = f"Percentage: {pct_match.group(0)}"
+                elif cgpa_match and float(cgpa_match.group(1)) <= 10:
+                    score_val = f"CGPA: {cgpa_match.group(1)}"
+
+            # Clean the line by removing year and score
             cleaned_line = line
             if year_val:
-                cleaned_line = re.sub(re.escape(year_val), '', cleaned_line).strip()
-                cleaned_line = re.sub(r'^[•\-\*\s|–]+|[•\-\*\s|–]+$', '', cleaned_line).strip()
-            if is_new_edu:
+                cleaned_line = cleaned_line.replace(year_val, "").strip()
+            if score_val:
+                # Remove score portion from display line
+                cleaned_line = re.sub(re.escape(score_match.group(0) if score_match else (pct_match.group(0) if pct_match else "")), '', cleaned_line).strip() if (score_match or pct_match) else cleaned_line
+            cleaned_line = re.sub(r'^[\-–—|•*\s,]+|[\-–—|•*\s,]+$', '', cleaned_line).strip()
+
+            if is_new_edu and cleaned_line:
+                # Build school from any institution-like text following the degree
+                # Try to split by common delimiters to separate degree from school
+                parts = [p.strip() for p in re.split(r'[,\t|–—]', cleaned_line) if p.strip()]
+                degree_text = parts[0] if parts else cleaned_line
+                school_text = " — ".join(parts[1:]) if len(parts) > 1 else ""
+                year_display = year_val
+                if score_val:
+                    year_display = f"{year_val}  |  {score_val}" if year_val else score_val
+
                 structure["education"].append({
-                    "degree": cleaned_line,
-                    "school": "",
-                    "year": year_val
+                    "degree": degree_text,
+                    "school": school_text,
+                    "year": year_display
                 })
             else:
-                if structure["education"]:
-                    if year_val and not structure["education"][-1]["year"]:
-                        structure["education"][-1]["year"] = year_val
-                    if cleaned_line:
-                        if not structure["education"][-1]["school"]:
-                            structure["education"][-1]["school"] = cleaned_line
-                        else:
-                            structure["education"][-1]["school"] += " | " + cleaned_line
-                else:
+                # Continuation line — append to the last education entry
+                if structure["education"] and cleaned_line:
+                    last_edu = structure["education"][-1]
+                    if not last_edu["school"]:
+                        last_edu["school"] = cleaned_line
+                    else:
+                        last_edu["school"] += " — " + cleaned_line
+                    if year_val and not last_edu["year"]:
+                        last_edu["year"] = year_val
+                    if score_val and score_val not in last_edu["year"]:
+                        last_edu["year"] = f"{last_edu['year']}  |  {score_val}" if last_edu["year"] else score_val
+                elif cleaned_line:
                     structure["education"].append({
                         "degree": cleaned_line,
-                        "school": "University",
-                        "year": year_val or "2023"
+                        "school": "",
+                        "year": year_val or ""
                     })
+
         elif current_section == "certifications":
-            cert_val = re.sub(r'^[•\-\*\s]+', '', line)
+            cert_val = re.sub(r'^[•\-\*–\s]+', '', line)
             if cert_val:
                 structure["certifications"].append(cert_val)
 
+    # Save any remaining experience
     save_experience()
 
+    # Default fallbacks
     if not structure["summary"]:
         structure["summary"] = "Dedicated specialist seeking target growth role."
     if not structure["skills"]:
