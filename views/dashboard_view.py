@@ -61,8 +61,8 @@ def render_dashboard_view():
 """), unsafe_allow_html=True)
 
         uploaded_file = st.file_uploader(
-            "Drag and drop your PDF, DOCX, or JSON resume",
-            type=["pdf", "docx", "json"],
+            "Drag and drop your PDF or DOCX resume",
+            type=["pdf", "docx"],
             key="resume_file_uploader"
         )
 
